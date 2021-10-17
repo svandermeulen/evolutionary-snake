@@ -11,12 +11,11 @@ import time
 from neat.nn import FeedForwardNetwork
 from pygame.locals import *
 
-from src.game.snake_builder import Snake
-from src.game.snake_rules import Apple, is_collision
-from src.machine_learning.loss_calculator import compute_input_variables
+from src.game.object_builder import Snake, Apple
 from src.config import DISPLAY_WIDTH, DISPLAY_HEIGHT, LENGTH, STEP_SIZE, BOUNDARY, APPROACHING_SCORE, \
     RETRACTING_PENALTY, EAT_APPLE_SCORE, COLLISION_PENALTY, STEP_LIMIT, FRAME_RATE, BACKGROUND_RUN, \
     HUMAN_PLAYER, COORDINATES_BOUNDARY
+from src.machine_learning.loss_calculator import compute_input_variables
 from src.utils.drawing_manager import MySurface, MyFont
 
 
@@ -101,7 +100,7 @@ class Game(object):
         self.apple_distance = apple_distance_current
 
         # does snake eat apple?
-        if is_collision(self.apple.x, self.apple.y, self.player.x[0], self.player.y[0]):
+        if self.is_collision(self.apple.x, self.apple.y, self.player.x[0], self.player.y[0]):
             self.player.length = self.player.length + 1
             self.apple = Apple(x_snake=self.player.x[0:self.player.length], y_snake=self.player.y[0:self.player.length])
             self.score += EAT_APPLE_SCORE
@@ -115,7 +114,7 @@ class Game(object):
 
         # does snake collide with itself?
         for i in range(2, self.player.length - 1):
-            if is_collision(self.player.x[0], self.player.y[0], self.player.x[i], self.player.y[i]):
+            if self.is_collision(self.player.x[0], self.player.y[0], self.player.x[i], self.player.y[i]):
                 self.score -= COLLISION_PENALTY
                 print(f"{self.name} collided with itself")
                 self._running = False
@@ -143,6 +142,14 @@ class Game(object):
     @staticmethod
     def on_cleanup():
         pygame.quit()
+
+    @staticmethod
+    def is_collision(x1: int, y1: int, x2: int, y2: int):
+
+        if x2 == x1:
+            if y2 == y1:
+                return True
+        return False
 
     def get_direction(self) -> str:
 

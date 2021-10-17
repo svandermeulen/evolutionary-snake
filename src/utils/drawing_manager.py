@@ -2,12 +2,8 @@
 Created on: 8-2-2018
 @author: Stef
 """
-import time
-
-import os
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
-
 import pygame
+import time
 
 from typing import List
 from random import choice, seed
@@ -17,13 +13,12 @@ import src.config as config
 
 class MySurface(object):
 
-    def __init__(self, w: int, h: int,  rgb: tuple):
+    def __init__(self, w: int, h: int, rgb: tuple):
         self.width = w
         self.height = h
         self.rgb = rgb
 
     def create(self) -> pygame.Surface:
-
         my_surface = pygame.Surface((self.width, self.height))
         my_surface.fill(self.rgb)
         return my_surface
@@ -48,10 +43,12 @@ class MyFont(object):
 
 def generate_coordinate(coordinates_snake: List[tuple]) -> tuple:
     """
-    Return a x, y coordinate randomnly chosen from a list of possible coordinates
+    Return a x, y coordinate randomly chosen from a list of possible coordinates
     Removes the x,y coordinates that overlap with the snake and boundary if present
     """
-    coordinates = [c for c in config.COORDINATES if c not in coordinates_snake]  # apple cannot be generated on top of snake
-    coordinates = [c for c in coordinates if c not in config.COORDINATES_BOUNDARY]  # apple cannot be generated on top of boundary
+    coordinates = [c for c in config.COORDINATES if
+                   c not in coordinates_snake]  # apple cannot be generated on top of snake
+    coordinates = [c for c in coordinates if
+                   c not in config.COORDINATES_BOUNDARY]  # apple cannot be generated on top of boundary
     seed(time.time())
     return choice(coordinates)

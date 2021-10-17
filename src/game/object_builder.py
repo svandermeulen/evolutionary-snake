@@ -2,9 +2,23 @@
 Created on: 8-2-2018
 @author: Stef
 """
+import pygame
+
 from pygame.surface import Surface
 
 from src.config import DISPLAY_HEIGHT, DISPLAY_WIDTH, STEP_SIZE, RASTER_SIZE, BOUNDARY
+from src.utils.drawing_manager import generate_coordinate
+
+
+class Apple(object):
+
+    def __init__(self, x_snake: list, y_snake):
+
+        coordinates_apple = [(a, b) for a, b in zip(x_snake, y_snake)]
+        self.x, self.y = generate_coordinate(coordinates_snake=coordinates_apple)
+
+    def draw(self, surface: pygame.Surface, image: pygame.Surface):
+        surface.blit(image, (self.x, self.y))
 
 
 class Snake(object):
