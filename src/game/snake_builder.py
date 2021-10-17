@@ -38,7 +38,7 @@ class Snake(object):
     def update(self):
 
         self.update_count += 1
-        if self.update_count > self.update_count_max:
+        while self.update_count > self.update_count_max:
 
             # update previous positions
             for i in range(self.length - 1, 0, -1):

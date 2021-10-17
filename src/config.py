@@ -7,9 +7,9 @@ import numpy as np
 import os
 
 # GAME SETTINGS
-HUMAN_PLAYER = False
+HUMAN_PLAYER = True
 BACKGROUND_RUN = False if HUMAN_PLAYER else False
-RUN_IN_PARALLEL = True
+RUN_IN_PARALLEL = False
 
 GAME_SIZE = 1 if not HUMAN_PLAYER else 3
 STEP_SIZE = 5 * GAME_SIZE

@@ -2,13 +2,11 @@
 Created on: 8-2-2018
 @author: Stef
 """
-import os
 import json
-import time
-
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
-import pygame
 import numpy as np
+import os
+import pygame
+import time
 
 from neat.nn import FeedForwardNetwork
 from pygame.locals import *
@@ -21,6 +19,8 @@ from src.config import DISPLAY_WIDTH, DISPLAY_HEIGHT, LENGTH, STEP_SIZE, BOUNDAR
     HUMAN_PLAYER, COORDINATES_BOUNDARY
 from src.utils.drawing_manager import MySurface, MyFont
 
+
+# os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 
 class Game(object):
 
@@ -87,16 +87,7 @@ class Game(object):
 
         return True
 
-    def on_event(self, event):
-
-        if event.type == QUIT or (
-                event.type == KEYDOWN and (
-                event.key == K_ESCAPE or
-                event.key == K_q
-        )):
-            self._running = False
-
-    def on_loop(self, counts: int) -> int:
+    def on_loop(self, steps_without_apple: int) -> int:
         self.player.update()
 
         self.input_vector = compute_input_variables(apple=self.apple, snake=self.player)
@@ -114,7 +105,7 @@ class Game(object):
             self.player.length = self.player.length + 1
             self.apple = Apple(x_snake=self.player.x[0:self.player.length], y_snake=self.player.y[0:self.player.length])
             self.score += EAT_APPLE_SCORE
-            counts = 0
+            steps_without_apple = 0
 
         if BOUNDARY:
             if (self.player.x[0], self.player.y[0]) in COORDINATES_BOUNDARY:
@@ -129,7 +120,7 @@ class Game(object):
                 print(f"{self.name} collided with itself")
                 self._running = False
 
-        return counts
+        return steps_without_apple
 
     def on_render(self):
 
@@ -228,7 +219,7 @@ class Game(object):
                 # print("Snake {} has reached the step limit of: {}".format(self.name, self.step_limit))
                 self._running = False
 
-            steps_without_apple = self.on_loop(counts=steps_without_apple)
+            steps_without_apple = self.on_loop(steps_without_apple=steps_without_apple)
 
             if self.show_game:
                 self.on_render()

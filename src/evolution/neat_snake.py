@@ -22,7 +22,12 @@ def play_snake(genome: DefaultGenome, name_snake: str, config, x: int = 30, y: i
     genome.fitness = 1000
     net = neat.nn.FeedForwardNetwork.create(genome, config)
 
-    genome.fitness = Game(name=name_snake, neural_net=net, path_output=PATH_OUTPUT_TEMP, step_limit=step_limit).on_execute()
+    genome.fitness = Game(
+        name=name_snake,
+        neural_net=net,
+        path_output=PATH_OUTPUT_TEMP,
+        step_limit=step_limit
+    ).on_execute()
     return genome
 
 
