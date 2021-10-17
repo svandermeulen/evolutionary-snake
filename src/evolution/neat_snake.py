@@ -10,7 +10,8 @@ from multiprocessing import Process
 from neat import DefaultGenome
 
 from src.game.game_builder import Game
-from src.config import DISPLAY_HEIGHT, DISPLAY_WIDTH, STEP_LIMIT, GENERATIONS, PATH_OUTPUT_TEMP, SCREENS_PER_ROW
+from src.config import DISPLAY_HEIGHT, DISPLAY_WIDTH, STEP_LIMIT, GENERATIONS, PATH_OUTPUT_TEMP, SCREENS_PER_ROW, \
+    RUN_IN_PARALLEL
 from src.visualisation import visualize
 
 
@@ -41,6 +42,20 @@ def retrieve_snake_scores():
         name = file_name[:file_name.find(".json")]
         results_dict[name] = result[name]
     return results_dict
+
+
+def eval_genomes_sequential(genomes: list, config: neat.config.Config) -> bool:
+
+    for i, (genome_id, genome) in enumerate(genomes):
+
+        snake_name = "snake_{}".format(str(i).zfill(2))
+        play_snake(genome=genome, name_snake=snake_name, config=config)
+
+    results = retrieve_snake_scores()
+    for i, (_, g) in enumerate(genomes):
+        g.fitness = results[f"snake_{str(i).zfill(2)}"]
+
+    return True
 
 
 def eval_genomes_parallel(genomes: list, config: neat.config.Config):
@@ -110,9 +125,12 @@ def run_evolution(path_neat_config: str, path_checkpoint: str):
     p.add_reporter(stats)
     p.add_reporter(neat.Checkpointer(10, filename_prefix=path_checkpoint))
 
-    # Run for up to n generations.
-    eval_genomes_parallel.counter = 0
-    best_genome = p.run(eval_genomes_parallel, n=GENERATIONS)
+    if RUN_IN_PARALLEL:
+        # Run for up to n generations.
+        eval_genomes_parallel.counter = 0
+        best_genome = p.run(eval_genomes_parallel, n=GENERATIONS)
+    else:
+        best_genome = p.run(eval_genomes_sequential, n=GENERATIONS)
 
     node_names = {
         -1: 'Apple_left', -2: 'Apple_right', -3: "Apple_up", -4: "Apple_down",

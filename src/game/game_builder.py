@@ -5,6 +5,7 @@ Created on: 8-2-2018
 import os
 import json
 import time
+
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 import numpy as np
@@ -23,7 +24,7 @@ from src.utils.drawing_manager import MySurface, MyFont
 
 class Game(object):
 
-    def __init__(self, name: str, path_output: str, neural_net: FeedForwardNetwork=None, show_game: bool=None,
+    def __init__(self, name: str, path_output: str, neural_net: FeedForwardNetwork = None, show_game: bool = None,
                  step_limit: int = None):
 
         self.name = name
@@ -64,11 +65,12 @@ class Game(object):
         dx = self.player.x[1] - self.player.x[0]
         dy = self.player.y[1] - self.player.y[0]
 
-        d = {"right": False if dx % DISPLAY_WIDTH == STEP_SIZE else True,
-             "left": False if dx % -DISPLAY_WIDTH == -STEP_SIZE else True,
-             "up": False if dy % -DISPLAY_HEIGHT == -STEP_SIZE else True,
-             "down": False if dy % DISPLAY_HEIGHT == STEP_SIZE else True}
-        return d
+        return {
+            "right": False if dx % DISPLAY_WIDTH == STEP_SIZE else True,
+            "left": False if dx % -DISPLAY_WIDTH == -STEP_SIZE else True,
+            "up": False if dy % -DISPLAY_HEIGHT == -STEP_SIZE else True,
+            "down": False if dy % DISPLAY_HEIGHT == STEP_SIZE else True
+        }
 
     def on_init(self) -> True:
 
@@ -151,22 +153,29 @@ class Game(object):
     def on_cleanup():
         pygame.quit()
 
-    @staticmethod
-    def get_direction(prediction: np.array):
+    def get_direction(self) -> str:
 
-        keys = np.zeros(323)
+        if not HUMAN_PLAYER:
+            prediction = self.nn.activate(self.input_vector)
+            assert type(np.argmax(prediction)) == np.int64, "{} is multiple maximal values"
+            if np.argmax(prediction) == 0:
+                return "right"
+            elif np.argmax(prediction) == 1:
+                return "left"
+            elif np.argmax(prediction) == 2:
+                return "up"
+            return "down"
 
-        assert type(np.argmax(prediction)) == np.int64, "{} is multiple maximal values"
-
-        if np.argmax(prediction) == 0:
-            keys[K_RIGHT] += 1
-        elif np.argmax(prediction) == 1:
-            keys[K_LEFT] += 1
-        elif np.argmax(prediction) == 2:
-            keys[K_UP] += 1
-        else:
-            keys[K_DOWN] += 1
-        return tuple(keys)
+        keys = pygame.key.get_pressed()
+        if keys[K_DOWN]:
+            return "down"
+        if keys[K_UP]:
+            return "up"
+        if keys[K_LEFT]:
+            return "left"
+        if keys[K_RIGHT]:
+            return "right"
+        return ""
 
     def on_execute(self) -> float:
 
@@ -191,34 +200,31 @@ class Game(object):
             with open(self.path_score, "w") as f:
                 f.write(json.dumps({self.name: self.score}))
 
-            if not HUMAN_PLAYER:
-                prediction = self.nn.activate(self.input_vector)
-                keys = self.get_direction(prediction=prediction)
-            else:
-                keys = pygame.key.get_pressed()
+            direction = self.get_direction()
 
             if self.show_game:
                 pygame.event.pump()
 
             allowed_directions = self._is_dir_allowed()
 
-            if keys[K_RIGHT] and allowed_directions["right"]:
+            if direction == "right" and allowed_directions[direction]:
                 direction_count["right"] = True
                 self.player.move_right()
 
-            if keys[K_LEFT] and allowed_directions["left"]:
+            if direction == "left" and allowed_directions[direction]:
                 direction_count["left"] = True
                 self.player.move_left()
 
-            if keys[K_UP] and allowed_directions["up"]:
+            if direction == "up" and allowed_directions[direction]:
                 direction_count["up"] = True
                 self.player.move_up()
 
-            if keys[K_DOWN] and allowed_directions["down"]:
+            if direction == "down" and allowed_directions[direction]:
                 direction_count["down"] = True
                 self.player.move_down()
 
-            if keys[K_ESCAPE] or steps_without_apple >= self.step_limit or (keys[K_c] and keys[K_LCTRL]):
+            if pygame.key.get_pressed()[K_ESCAPE] or steps_without_apple >= self.step_limit or (
+                    pygame.key.get_pressed()[K_c] and pygame.key.get_pressed()[K_LCTRL]):
                 # print("Snake {} has reached the step limit of: {}".format(self.name, self.step_limit))
                 self._running = False
 

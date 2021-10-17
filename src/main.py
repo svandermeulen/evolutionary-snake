@@ -54,9 +54,4 @@ def main():
 
 
 if __name__ == "__main__":
-
-    # main()
-    run_checkpoint(path_checkpoint=os.path.join(PATH_OUTPUT, "20200820_214946", "neat-checkpoint-37"),
-                   path_neat_config=os.path.join(PATH_INPUT, "neat_config"))
-
-    print("Done")
+    main()
