@@ -11,7 +11,7 @@ from neat.checkpoint import Checkpointer
 
 
 from src.evolution.neat_snake import run_evolution, run_genome
-from src.game.game_builder import Game
+from src.game.game_builder import Game, GameHumanPlayer
 from src.config import PATH_INPUT, HUMAN_PLAYER, PATH_OUTPUT_TEMP, PATH_OUTPUT
 
 
@@ -44,7 +44,7 @@ def main():
         print('\nBest genome:\n{!s}'.format(best_genome))
         run_genome(winner=best_genome, path_neat_config=path_neat_config)
     else:
-        Game(name="human_player", path_output=PATH_OUTPUT).on_execute()
+        GameHumanPlayer().execute()
 
     # move all created output visualizations and checkpoints
     [shutil.move(p, os.path.join(path_output, p)) for p in os.listdir(".") if

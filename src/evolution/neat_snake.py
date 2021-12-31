@@ -27,7 +27,7 @@ def play_snake(genome: DefaultGenome, name_snake: str, config, x: int = 30, y: i
         neural_net=net,
         path_output=PATH_OUTPUT_TEMP,
         step_limit=step_limit
-    ).on_execute()
+    ).execute()
     return genome
 
 
@@ -161,7 +161,7 @@ def run_genome(winner, path_neat_config: str):
     winner_net = neat.nn.FeedForwardNetwork.create(winner, neat_config)
     the_app = Game(name="best_genome", neural_net=winner_net, path_output=PATH_OUTPUT_TEMP, show_game=True, step_limit=-1)
 
-    final_score = the_app.on_execute()
+    final_score = the_app.execute()
 
     print("The best genome scored {} points".format(final_score))
 

@@ -11,7 +11,7 @@ from random import choice, seed
 import src.config as config
 
 
-class MySurface(object):
+class MySurface:
 
     def __init__(self, w: int, h: int, rgb: tuple):
         self.width = w
@@ -24,7 +24,7 @@ class MySurface(object):
         return my_surface
 
 
-class MyFont(object):
+class MyFont:
 
     def __init__(self, x: int, y: int, rgb: tuple, font_size: int):
         self.rgb = rgb
@@ -50,5 +50,5 @@ def generate_coordinate(coordinates_snake: List[tuple]) -> tuple:
                    c not in coordinates_snake]  # apple cannot be generated on top of snake
     coordinates = [c for c in coordinates if
                    c not in config.COORDINATES_BOUNDARY]  # apple cannot be generated on top of boundary
-    seed(time.time())
+    # seed(time.time())
     return choice(coordinates)
