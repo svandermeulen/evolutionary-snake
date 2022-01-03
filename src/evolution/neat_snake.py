@@ -2,63 +2,40 @@
 Created on: 4-8-2018
 @author: Stef
 """
-import json
+import multiprocessing
 import neat
 import os
 
 from multiprocessing import Process
 from neat import DefaultGenome
 
-from src.game.game_builder import Game
+from src.game.game_builder import GameNeuralNet
 from src.config import DISPLAY_HEIGHT, DISPLAY_WIDTH, STEP_LIMIT, GENERATIONS, PATH_OUTPUT_TEMP, SCREENS_PER_ROW, \
     RUN_IN_PARALLEL
 from src.visualisation import visualize
 
 
-def play_snake(genome: DefaultGenome, name_snake: str, config, x: int = 30, y: int = 30, step_limit: int = STEP_LIMIT):
-
+def play_snake(genome: DefaultGenome, snake_id: int, config, genome_dict: dict, x: int = 30, y: int = 30, step_limit: int = STEP_LIMIT) -> dict:
     os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (x, y)
 
     genome.fitness = 1000
     net = neat.nn.FeedForwardNetwork.create(genome, config)
 
-    genome.fitness = Game(
-        name=name_snake,
+    snake_game = GameNeuralNet(
+        name="snake_{}".format(str(snake_id).zfill(2)),
         neural_net=net,
-        path_output=PATH_OUTPUT_TEMP,
         step_limit=step_limit
-    ).execute()
-    return genome
-
-
-def retrieve_snake_scores():
-    results_dict = {}
-    json_paths = [os.path.join(PATH_OUTPUT_TEMP, f) for f in os.listdir(PATH_OUTPUT_TEMP) if f.endswith(".json")]
-    print("Number of json-files: {}".format(len(json_paths)))
-    for path in json_paths:
-        file_name = os.path.basename(path)
-        with open(path, "rb") as f:
-            try:
-                result = json.loads(f.read())
-            except json.decoder.JSONDecodeError as e:
-                print("{}, with path: {}".format(e, path))
-                name = file_name[:file_name.find(".json")]
-                result = {name: 0}
-        name = file_name[:file_name.find(".json")]
-        results_dict[name] = result[name]
-    return results_dict
+    )
+    snake_game.execute()
+    genome.fitness = snake_game.loss
+    genome_dict[snake_id] = genome
+    return genome_dict
 
 
 def eval_genomes_sequential(genomes: list, config: neat.config.Config) -> bool:
-
-    for i, (genome_id, genome) in enumerate(genomes):
-
-        snake_name = "snake_{}".format(str(i).zfill(2))
-        play_snake(genome=genome, name_snake=snake_name, config=config)
-
-    results = retrieve_snake_scores()
-    for i, (_, g) in enumerate(genomes):
-        g.fitness = results[f"snake_{str(i).zfill(2)}"]
+    genome_dict = {}
+    for (genome_id, genome) in genomes:
+        genome_dict = play_snake(genome=genome, snake_id=genome_id, config=config, genome_dict=genome_dict)
 
     return True
 
@@ -72,20 +49,19 @@ def eval_genomes_parallel(genomes: list, config: neat.config.Config):
     generation = eval_genomes_parallel.counter
     step_limit = STEP_LIMIT + (generation - (generation % 5)) * 20
 
+    genome_dict = multiprocessing.Manager().dict()
     for i, (genome_id, genome) in enumerate(genomes):
-
-        snake_name = "snake_{}".format(str(i).zfill(2))
         display_x = 1.2 * (DISPLAY_WIDTH * (i % SCREENS_PER_ROW))
         if not i == 0 and i % SCREENS_PER_ROW == 0:
             display_y += 1.5 * DISPLAY_HEIGHT
 
         p = Process(
             target=play_snake, kwargs={
-                "genome": genome, "name_snake": snake_name, "config":  config, "x": display_x, "y": display_y,
-                "step_limit": step_limit
+                "genome": genome, "snake_id": genome_id, "config": config, "x": display_x, "y": display_y,
+                "step_limit": step_limit, "genome_dict": genome_dict
             }
         )
-        job_names[p.name] = snake_name
+        job_names[p.name] = genome_id
         jobs.append(p)
         p.start()
 
@@ -100,9 +76,8 @@ def eval_genomes_parallel(genomes: list, config: neat.config.Config):
             p.terminate()
         p.join()
 
-    results = retrieve_snake_scores()
-    for i, (_, g) in enumerate(genomes):
-        g.fitness = results[f"snake_{str(i).zfill(2)}"]
+    for (genome_id, genome) in genomes:
+        genome.fitness = genome_dict[genome_id].fitness
 
     eval_genomes_parallel.counter += 1
 
@@ -117,7 +92,6 @@ def get_neat_config(path_neat_config: str) -> neat.Config:
 
 
 def run_evolution(path_neat_config: str, path_checkpoint: str):
-
     neat_config = get_neat_config(path_neat_config=path_neat_config)
     neat_config.save(os.path.join(os.path.dirname(path_checkpoint), "neat_config"))
 
@@ -156,10 +130,14 @@ def run_evolution(path_neat_config: str, path_checkpoint: str):
 
 
 def run_genome(winner, path_neat_config: str):
-
     neat_config = get_neat_config(path_neat_config=path_neat_config)
     winner_net = neat.nn.FeedForwardNetwork.create(winner, neat_config)
-    the_app = Game(name="best_genome", neural_net=winner_net, path_output=PATH_OUTPUT_TEMP, show_game=True, step_limit=-1)
+    the_app = GameNeuralNet(
+        name="best_genome",
+        neural_net=winner_net,
+        path_output=PATH_OUTPUT_TEMP,
+        step_limit=-1
+    )
 
     final_score = the_app.execute()
 

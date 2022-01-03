@@ -22,10 +22,9 @@ class Object(ABC):
 
 class Snake(Object):
 
-    def __init__(self, length: int):
+    def __init__(self, length: int, x_init: int, y_init: int):
 
-        # initialize snake in center of display
-        self.x, self.y = [DISPLAY_HEIGHT // 2], [DISPLAY_WIDTH // 2]
+        self.x, self.y = [x_init], [y_init]
         self.direction = np.random.randint(0, 4)
         self.length = length
         self.initialize_snake()

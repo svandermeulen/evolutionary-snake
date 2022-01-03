@@ -9,14 +9,12 @@ import shutil
 from datetime import datetime
 from neat.checkpoint import Checkpointer
 
-
 from src.evolution.neat_snake import run_evolution, run_genome
-from src.game.game_builder import Game, GameHumanPlayer
+from src.game.game_builder import GameHumanPlayer
 from src.config import PATH_INPUT, HUMAN_PLAYER, PATH_OUTPUT_TEMP, PATH_OUTPUT
 
 
 def run_checkpoint(path_checkpoint: str, path_neat_config: str):
-
     population = Checkpointer.restore_checkpoint(path_checkpoint).population
     d = {k: v.fitness for k, v in population.items() if v.fitness is not None}
     best_genome_key = max(d.items(), key=operator.itemgetter(1))[0]
@@ -27,7 +25,6 @@ def run_checkpoint(path_checkpoint: str, path_neat_config: str):
 
 
 def main():
-
     datetime_run = datetime.strftime(datetime.now(), "%Y%m%d_%H%M%S")
     path_output = os.path.join(PATH_OUTPUT, datetime_run)
     os.mkdir(path_output)
@@ -40,7 +37,8 @@ def main():
     path_neat_config = os.path.join(PATH_INPUT, "neat_config")
 
     if not HUMAN_PLAYER:
-        best_genome = run_evolution(path_neat_config=path_neat_config, path_checkpoint=os.path.join(path_output, "neat-checkpoint-"))
+        best_genome = run_evolution(path_neat_config=path_neat_config,
+                                    path_checkpoint=os.path.join(path_output, "neat-checkpoint-"))
         print('\nBest genome:\n{!s}'.format(best_genome))
         run_genome(winner=best_genome, path_neat_config=path_neat_config)
     else:

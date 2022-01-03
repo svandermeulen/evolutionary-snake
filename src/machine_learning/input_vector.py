@@ -12,7 +12,6 @@ from src.config import BOUNDARY
 
 
 def respect_to_apple(apple: Apple, snake: Snake) -> np.ndarray:
-
     vector = np.zeros(4)
 
     # is the apple to the left
@@ -71,7 +70,6 @@ def _top_edge_clear(snake: Snake) -> bool:
 
 
 def respect_to_self(snake: Snake) -> np.ndarray:
-
     vector = np.zeros(4)
     snake_coordinates = [(a, b) for a, b in zip(snake.x[:snake.length], snake.y[:snake.length])]
 
@@ -95,10 +93,9 @@ def respect_to_self(snake: Snake) -> np.ndarray:
 
 
 def compute_input_variables(apple: Apple, snake: Snake) -> list:
-
     vector = respect_to_apple(apple=apple, snake=snake)
     vector = np.append(vector, respect_to_self(snake=snake))
-    return np.expand_dims(vector, axis=0).tolist()[0]
+    return list(vector)
 
 
 def main():
