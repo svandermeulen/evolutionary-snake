@@ -92,7 +92,7 @@ def respect_to_self(snake: Snake) -> np.ndarray:
     return vector
 
 
-def compute_input_variables(apple: Apple, snake: Snake) -> list:
+def compute_input_vector(apple: Apple, snake: Snake) -> list:
     vector = respect_to_apple(apple=apple, snake=snake)
     vector = np.append(vector, respect_to_self(snake=snake))
     return list(vector)

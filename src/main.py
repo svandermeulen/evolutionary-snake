@@ -52,4 +52,10 @@ def main():
 
 
 if __name__ == "__main__":
+
+    # path_run = os.path.abspath("D:/Stack/stef/software/python/snake/output/20220104_143650")
+    # path_checkpoint = os.path.join(path_run, "neat-checkpoint-20")
+    # path_config = os.path.join(path_run, "neat_config")
+    # run_checkpoint(path_checkpoint, path_config)
+
     main()

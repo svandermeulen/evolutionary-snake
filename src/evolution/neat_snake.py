@@ -33,9 +33,8 @@ def play_snake(genome: DefaultGenome, snake_id: int, config, genome_dict: dict, 
 
 
 def eval_genomes_sequential(genomes: list, config: neat.config.Config) -> bool:
-    genome_dict = {}
     for (genome_id, genome) in genomes:
-        genome_dict = play_snake(genome=genome, snake_id=genome_id, config=config, genome_dict=genome_dict)
+        _ = play_snake(genome=genome, snake_id=genome_id, config=config, genome_dict={})
 
     return True
 
@@ -45,7 +44,7 @@ def eval_genomes_parallel(genomes: list, config: neat.config.Config):
     jobs = []
     job_names = {}
 
-    assert hasattr(eval_genomes_parallel, "counter"), "Callable 'eval_genomes_parallel' has not attribute 'counter'"
+    assert hasattr(eval_genomes_parallel, "counter"), "Callable 'eval_genomes_parallel' has no attribute 'counter'"
     generation = eval_genomes_parallel.counter
     step_limit = STEP_LIMIT + (generation - (generation % 5)) * 20
 
@@ -123,8 +122,8 @@ def run_evolution(path_neat_config: str, path_checkpoint: str):
         node_names=node_names,
         directory=os.path.dirname(path_checkpoint)
     )
-    visualize.plot_stats(stats, ylog=False, view=True)
-    visualize.plot_species(stats, view=True)
+    visualize.plot_stats(stats, ylog=False, view=True, filename=os.path.join(os.path.dirname(path_checkpoint), "avg_fitness.svg"))
+    visualize.plot_species(stats, view=True, filename=os.path.join(os.path.dirname(path_checkpoint), "speciation.svg"))
 
     return best_genome
 
@@ -135,7 +134,6 @@ def run_genome(winner, path_neat_config: str):
     the_app = GameNeuralNet(
         name="best_genome",
         neural_net=winner_net,
-        path_output=PATH_OUTPUT_TEMP,
         step_limit=-1
     )
 

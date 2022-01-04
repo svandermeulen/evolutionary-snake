@@ -14,7 +14,7 @@ from pygame.locals import *
 from src.game.object_builder import Snake, Apple
 from src.config import DISPLAY_WIDTH, DISPLAY_HEIGHT, LENGTH, STEP_SIZE, BOUNDARY, APPROACHING_SCORE, \
     RETRACTING_PENALTY, EAT_APPLE_SCORE, COLLISION_PENALTY, STEP_LIMIT, FRAME_RATE, COORDINATES_BOUNDARY
-from src.machine_learning.input_vector import compute_input_variables
+from src.machine_learning.input_vector import compute_input_vector
 from src.utils.drawing_manager import MySurface, MyFont
 
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
@@ -33,23 +33,8 @@ class Game(ABC):
         self.score_font = MyFont(x=4 * DISPLAY_WIDTH // 5, y=DISPLAY_HEIGHT - 2, rgb=(0, 0, 0), font_size=8)
         self.snake = Snake(length=LENGTH, x_init=DISPLAY_WIDTH // 2, y_init=DISPLAY_HEIGHT // 2)
         self.apple = Apple(snake=self.snake)
-        self.input_vector = compute_input_variables(apple=self.apple, snake=self.snake)
+        self.input_vector = compute_input_vector(apple=self.apple, snake=self.snake)
         self.score = 0
-
-    def is_valid_direction(self, direction: int) -> bool:
-
-        dx = self.snake.x[1] - self.snake.x[0]
-        dy = self.snake.y[1] - self.snake.y[0]
-
-        if direction == 0:
-            return False if dx % DISPLAY_WIDTH == STEP_SIZE else True
-        elif direction == 1:
-            return False if dx % -DISPLAY_WIDTH == -STEP_SIZE else True
-        elif direction == 2:
-            return False if dy % -DISPLAY_HEIGHT == -STEP_SIZE else True
-        elif direction == 3:
-            return False if dy % DISPLAY_HEIGHT == STEP_SIZE else True
-        return True
 
     def render_canvas(self):
         self.game_canvas.fill((255, 255, 255))
@@ -141,8 +126,26 @@ class Game(ABC):
     def game_ending_conditions_other(self) -> bool:
         pass
 
-    @abstractmethod
     def get_direction(self) -> int:
+        direction = self._get_direction()
+        if self.is_valid_direction(direction=direction):
+            return direction
+        return self.snake.direction
+
+    def is_valid_direction(self, direction: int) -> bool:
+
+        if direction == 0 and self.snake.direction == 1:
+            return False
+        if direction == 1 and self.snake.direction == 0:
+            return False
+        if direction == 2 and self.snake.direction == 3:
+            return False
+        if direction == 3 and self.snake.direction == 2:
+            return False
+        return True
+
+    @abstractmethod
+    def _get_direction(self) -> int:
         pass
 
     def execute(self) -> bool:
@@ -159,11 +162,8 @@ class Game(ABC):
     def loop(self):
 
         pygame.event.pump()
-
         direction = self.get_direction()
-
-        if self.is_valid_direction(direction=direction):
-            self.snake.update(direction=direction)
+        self.snake.update(direction=direction)
         self._loop()
 
     @abstractmethod
@@ -180,7 +180,7 @@ class GameHumanPlayer(Game):
     def game_ending_conditions_other(self) -> bool:
         return False
 
-    def get_direction(self) -> int:
+    def _get_direction(self) -> int:
 
         keys = pygame.key.get_pressed()
         if keys[K_DOWN]:
@@ -221,7 +221,7 @@ class GameNeuralNet(Game):
 
     def game_ending_conditions_other(self) -> bool:
 
-        if self.steps_without_apple >= self.step_limit:
+        if self.steps_without_apple >= self.step_limit and self.step_limit >= 0:
             print(f"{self.name} played too long without catching apple")
             return True
         return False
@@ -254,6 +254,7 @@ class GameNeuralNet(Game):
         else:
             self.steps_without_apple += 1
 
+        self.input_vector = compute_input_vector(apple=self.apple, snake=self.snake)
         self.steps_total += 1
 
         return True
@@ -275,7 +276,7 @@ class GameNeuralNet(Game):
             return True
         return False
 
-    def get_direction(self) -> int:
+    def _get_direction(self) -> int:
         prediction = self.nn.activate(self.input_vector)
         assert type(np.argmax(prediction)) == np.int64, "{} is multiple maximal values"
         return int(np.argmax(prediction))

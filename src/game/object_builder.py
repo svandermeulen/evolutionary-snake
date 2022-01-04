@@ -3,14 +3,16 @@ Created on: 8-2-2018
 @author: Stef
 """
 from abc import abstractmethod, ABC
+from random import choice
+from typing import List
 
 import numpy as np
 import pygame
 
 from pygame.surface import Surface
 
-from src.config import DISPLAY_HEIGHT, DISPLAY_WIDTH, STEP_SIZE, RASTER_SIZE, BOUNDARY
-from src.utils.drawing_manager import generate_coordinate
+from src.config import DISPLAY_HEIGHT, DISPLAY_WIDTH, STEP_SIZE, RASTER_SIZE, BOUNDARY, COORDINATES, \
+    COORDINATES_BOUNDARY
 
 
 class Object(ABC):
@@ -77,7 +79,19 @@ class Apple(Object):
         snake_coordinates_x = snake.x[0:snake.length]
         snake_coordinates_y = snake.y[0:snake.length]
         coordinates_snake = [(a, b) for a, b in zip(snake_coordinates_x, snake_coordinates_y)]
-        self.x, self.y = generate_coordinate(coordinates_snake=coordinates_snake)
+        self.x, self.y = self.generate_coordinates(coordinates_snake=coordinates_snake)
+
+    @staticmethod
+    def generate_coordinates(coordinates_snake: List[tuple]) -> tuple:
+        """
+        Return a x, y coordinate randomly chosen from a list of possible coordinates
+        Removes the x,y coordinates that overlap with the snake and boundary if present
+        """
+        coordinates = [c for c in COORDINATES if
+                       c not in coordinates_snake]  # apple cannot be generated on top of snake
+        coordinates = [c for c in coordinates if
+                       c not in COORDINATES_BOUNDARY]  # apple cannot be generated on top of boundary
+        return choice(coordinates)
 
     def draw(self, surface: pygame.Surface, image: pygame.Surface):
         surface.blit(image, (self.x, self.y))

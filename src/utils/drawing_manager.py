@@ -3,12 +3,6 @@ Created on: 8-2-2018
 @author: Stef
 """
 import pygame
-import time
-
-from typing import List
-from random import choice, seed
-
-import src.config as config
 
 
 class MySurface:
@@ -39,16 +33,3 @@ class MyFont:
         label = my_font.render(text, True, self.rgb)
         surface.blit(label, (self.x, self.y))
         # surface.blit(label, ((surface.get_width() - label.get_width()) // 2, self.y))
-
-
-def generate_coordinate(coordinates_snake: List[tuple]) -> tuple:
-    """
-    Return a x, y coordinate randomly chosen from a list of possible coordinates
-    Removes the x,y coordinates that overlap with the snake and boundary if present
-    """
-    coordinates = [c for c in config.COORDINATES if
-                   c not in coordinates_snake]  # apple cannot be generated on top of snake
-    coordinates = [c for c in coordinates if
-                   c not in config.COORDINATES_BOUNDARY]  # apple cannot be generated on top of boundary
-    # seed(time.time())
-    return choice(coordinates)
