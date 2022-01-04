@@ -213,16 +213,27 @@ class GameNeuralNet(Game):
         self.loss = 0
         self.loss_font = MyFont(x=1 * DISPLAY_WIDTH // 5, y=DISPLAY_HEIGHT - 2, rgb=(0, 0, 0), font_size=8)
         self.steps_total = 0
+        self.exploration_score = {
+            0: 0,
+            1: 0,
+            2: 0,
+            3: 0
+        }
 
     def process_score(self):
 
         self.loss += self.steps_total
+        exploration_minimum = min(self.exploration_score.values())
+        if exploration_minimum > 0:
+            print(f"{self.name} utilized all directions at least {exploration_minimum} times.")
+            self.loss *= exploration_minimum
+
         print(f"{self.name} finished with loss: {self.loss}")
 
     def game_ending_conditions_other(self) -> bool:
 
         if self.steps_without_apple >= self.step_limit and self.step_limit >= 0:
-            print(f"{self.name} played too long without catching apple")
+            print(f"{self.name} played too long without eating apple")
             return True
         return False
 
@@ -279,4 +290,6 @@ class GameNeuralNet(Game):
     def _get_direction(self) -> int:
         prediction = self.nn.activate(self.input_vector)
         assert type(np.argmax(prediction)) == np.int64, "{} is multiple maximal values"
-        return int(np.argmax(prediction))
+        direction = int(np.argmax(prediction))
+        self.exploration_score[direction] += 1
+        return direction

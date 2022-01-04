@@ -101,7 +101,7 @@ def run_evolution(path_neat_config: str, path_checkpoint: str):
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-    p.add_reporter(neat.Checkpointer(10, filename_prefix=path_checkpoint))
+    p.add_reporter(neat.Checkpointer(generation_interval=1, filename_prefix=path_checkpoint))
 
     if RUN_IN_PARALLEL:
         # Run for up to n generations.
