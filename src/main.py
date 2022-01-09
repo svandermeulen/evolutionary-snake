@@ -11,7 +11,8 @@ from neat.checkpoint import Checkpointer
 
 from src.evolution.neat_snake import run_evolution, run_genome
 from src.game.game_builder import GameHumanPlayer
-from src.config import PATH_INPUT, HUMAN_PLAYER, PATH_OUTPUT_TEMP, PATH_OUTPUT
+from src.config import Config
+from src.paths import Paths
 
 
 def run_checkpoint(path_checkpoint: str, path_neat_config: str):
@@ -25,24 +26,31 @@ def run_checkpoint(path_checkpoint: str, path_neat_config: str):
 
 
 def main():
+
+    config = Config()
+    paths = Paths()
+
     datetime_run = datetime.strftime(datetime.now(), "%Y%m%d_%H%M%S")
-    path_output = os.path.join(PATH_OUTPUT, datetime_run)
+    path_output = os.path.join(paths.path_output, datetime_run)
     os.mkdir(path_output)
 
-    if not os.path.isdir(PATH_OUTPUT_TEMP):
-        os.mkdir(PATH_OUTPUT_TEMP)
-    [os.remove(os.path.join(PATH_OUTPUT_TEMP, p)) for p in os.listdir(PATH_OUTPUT_TEMP) if
-     os.path.isfile(os.path.join(PATH_OUTPUT_TEMP, p))]
+    if not os.path.isdir(paths.path_output_temp):
+        os.mkdir(paths.path_output_temp)
+    [os.remove(os.path.join(paths.path_output_temp, p)) for p in os.listdir(paths.path_output_temp) if
+     os.path.isfile(os.path.join(paths.path_output_temp, p))]
 
-    path_neat_config = os.path.join(PATH_INPUT, "neat_config")
+    path_neat_config = os.path.join(paths.path_input, "neat_config")
 
-    if not HUMAN_PLAYER:
-        best_genome = run_evolution(path_neat_config=path_neat_config,
-                                    path_checkpoint=os.path.join(path_output, "neat-checkpoint-"))
+    if not config.human_player:
+        best_genome = run_evolution(
+            path_neat_config=path_neat_config,
+            path_checkpoint=os.path.join(path_output, "neat-checkpoint-"),
+            config_game=config
+        )
         print('\nBest genome:\n{!s}'.format(best_genome))
-        run_genome(winner=best_genome, path_neat_config=path_neat_config)
+        run_genome(winner=best_genome, path_neat_config=path_neat_config, config_game=config)
     else:
-        GameHumanPlayer().execute()
+        GameHumanPlayer(config=config).execute()
 
     # move all created output visualizations and checkpoints
     [shutil.move(p, os.path.join(path_output, p)) for p in os.listdir(".") if

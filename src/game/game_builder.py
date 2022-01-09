@@ -12,53 +12,60 @@ from neat.nn import FeedForwardNetwork
 from pygame.locals import *
 
 from src.game.object_builder import Snake, Apple
-from src.config import DISPLAY_WIDTH, DISPLAY_HEIGHT, LENGTH, STEP_SIZE, BOUNDARY, APPROACHING_SCORE, \
-    RETRACTING_PENALTY, EAT_APPLE_SCORE, COLLISION_PENALTY, STEP_LIMIT, FRAME_RATE, COORDINATES_BOUNDARY
-from src.machine_learning.input_vector import compute_input_vector
-from src.utils.drawing_manager import MySurface, MyFont
+from src.config import Config
+from src.machine_learning.input_vector import InputVector
+from src.utils.drawing_manager import Canvas
 
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 
 
 class Game(ABC):
 
-    def __init__(self):
-
+    def __init__(self, config: Config):
         pygame.init()
         self.name = ""
-        self.running = True
-        self.game_canvas = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT + STEP_SIZE), pygame.HWSURFACE)
-        self.image_snake = MySurface(w=STEP_SIZE, h=STEP_SIZE, rgb=(0, 0, 0)).create()
-        self.image_apple = MySurface(w=STEP_SIZE, h=STEP_SIZE, rgb=(150, 0, 0)).create()
-        self.score_font = MyFont(x=4 * DISPLAY_WIDTH // 5, y=DISPLAY_HEIGHT - 2, rgb=(0, 0, 0), font_size=8)
-        self.snake = Snake(length=LENGTH, x_init=DISPLAY_WIDTH // 2, y_init=DISPLAY_HEIGHT // 2)
-        self.apple = Apple(snake=self.snake)
-        self.input_vector = compute_input_vector(apple=self.apple, snake=self.snake)
+        self.width = config.display_width
+        self.height = config.display_height
+        self.step_size: int = config.step_size
+        self.snake_length: int = config.snake_length
+        self.boundary = config.boundary
+        self.coordinates_grid = config.get_coordinates_grid()
+        self.coordinates_boundary = config.get_coordinates_boundary()
+        self.frame_rate = config.frame_rate
         self.score = 0
+        self.loss = None
+        self.snake = Snake(
+            length=self.snake_length,
+            x_init=self.width // 2,
+            y_init=self.height // 2,
+            width=self.width,
+            height=self.height,
+            step_size=self.step_size,
+            boundary=self.boundary
+        )
+        self.apple = Apple(
+            snake=self.snake,
+            coordinates_grid=self.coordinates_grid,
+            coordinates_boundary=self.coordinates_boundary
+        )
+        self.canvas = Canvas()
+
+    def execute(self) -> bool:
+
+        while self.game_continues():
+            self.loop()
+            self.render()
+            if self.frame_rate:
+                time.sleep(self.frame_rate)  # waiting time between frames
+        self.cleanup()
+
+        return True
 
     def render_canvas(self):
-        self.game_canvas.fill((255, 255, 255))
-
-    def render_score(self):
-        self.score_font.draw(
-            surface=self.game_canvas,
-            my_font=self.score_font.create(),
-            text="{}".format(str(self.score).zfill(5))
-        )
-
-    def render_metrics(self):
-        self.render_score()
-
-    def render_objects(self):
-        self.snake.draw(surface=self.game_canvas, image=self.image_snake)
-        self.apple.draw(surface=self.game_canvas, image=self.image_apple)
+        self.canvas.draw(score=self.score, loss=self.loss, snake=self.snake, apple=self.apple)
 
     def render(self) -> None:
-
         self.render_canvas()
-        self.render_metrics()
-        self.render_objects()
-        pygame.display.flip()
 
     @abstractmethod
     def process_score(self):
@@ -82,8 +89,8 @@ class Game(ABC):
         return False
 
     def collided_with_boundary(self) -> bool:
-        if BOUNDARY:
-            if (self.snake.x[0], self.snake.y[0]) in COORDINATES_BOUNDARY:
+        if self.boundary:
+            if (self.snake.x[0], self.snake.y[0]) in self.coordinates_boundary:
                 print(f"{self.name} collided with the boundary")
                 return True
         return False
@@ -102,8 +109,12 @@ class Game(ABC):
 
     def update_eating_apple(self):
         self.snake.length = self.snake.length + 1
-        self.apple = Apple(snake=self.snake)
-        self.score = self.snake.length - LENGTH
+        self.apple = Apple(
+            snake=self.snake,
+            coordinates_grid=self.coordinates_grid,
+            coordinates_boundary=self.coordinates_boundary
+        )
+        self.score = self.snake.length - self.snake_length
 
     @staticmethod
     def game_ending_key_press() -> bool:
@@ -148,17 +159,6 @@ class Game(ABC):
     def _get_direction(self) -> int:
         pass
 
-    def execute(self) -> bool:
-
-        while self.game_continues():
-            self.loop()
-            self.render()
-            if FRAME_RATE:
-                time.sleep(FRAME_RATE)  # waiting time between frames
-        self.cleanup()
-
-        return True
-
     def loop(self):
 
         pygame.event.pump()
@@ -172,10 +172,7 @@ class Game(ABC):
 
 
 class GameHumanPlayer(Game):
-
-    def __init__(self):
-        super().__init__()
-        self.name = "Human player"
+    name: str = "Human player"
 
     def game_ending_conditions_other(self) -> bool:
         return False
@@ -197,23 +194,30 @@ class GameHumanPlayer(Game):
         if self.eaten_apple():
             self.update_eating_apple()
 
+        iv = InputVector(snake=self.snake, apple=self.apple)
+        print(f"top side clear: {iv.top_side_clear()}")
+
     def process_score(self):
         print(f"{self.name} score: {self.score}")
 
 
 class GameNeuralNet(Game):
 
-    def __init__(self, name: str, neural_net: FeedForwardNetwork, step_limit: int = STEP_LIMIT):
-        super().__init__()
+    def __init__(self, config: Config, name: str, neural_net: FeedForwardNetwork):
+        super().__init__(config=config)
         self.name = name
-        self.nn = neural_net
+        self.step_limit = config.step_limit
+        self.approaching_score = config.approaching_score
+        self.retracting_penalty = config.retracting_penalty
+        self.eat_apple_score = config.eat_apple_score
+        self.collision_penalty = config.collision_penalty
+        self.neural_net = neural_net
         self.apple_distance = self.distance_to_apple()
-        self.step_limit = step_limit
+        self.input_vector = InputVector(snake=self.snake, apple=self.apple).compute()
         self.steps_without_apple = 0
         self.loss = 0
-        self.loss_font = MyFont(x=1 * DISPLAY_WIDTH // 5, y=DISPLAY_HEIGHT - 2, rgb=(0, 0, 0), font_size=8)
         self.steps_total = 0
-        self.exploration_score = {
+        self.direction_counts = {
             0: 0,
             1: 0,
             2: 0,
@@ -223,7 +227,7 @@ class GameNeuralNet(Game):
     def process_score(self):
 
         self.loss += self.steps_total
-        exploration_minimum = min(self.exploration_score.values())
+        exploration_minimum = min(self.direction_counts.values())
         if exploration_minimum > 0:
             print(f"{self.name} utilized all directions at least {exploration_minimum} times.")
             self.loss *= exploration_minimum
@@ -232,48 +236,37 @@ class GameNeuralNet(Game):
 
     def game_ending_conditions_other(self) -> bool:
 
-        if self.steps_without_apple >= self.step_limit and self.step_limit >= 0:
+        if self.steps_without_apple >= self.step_limit >= 0:
             print(f"{self.name} played too long without eating apple")
             return True
         return False
-
-    def render_metrics(self):
-        self.render_score()
-        self.render_loss()
-
-    def render_loss(self):
-        self.loss_font.draw(
-            surface=self.game_canvas,
-            my_font=self.loss_font.create(),
-            text="{}".format(str(self.loss))
-        )
 
     def _loop(self) -> int:
 
         # is the snake approaching or retracting from the apple?
         apple_distance_current = self.distance_to_apple()
         if apple_distance_current <= self.apple_distance:
-            self.loss += APPROACHING_SCORE
+            self.loss += self.approaching_score
         else:
-            self.loss -= RETRACTING_PENALTY
+            self.loss -= self.retracting_penalty
         self.apple_distance = apple_distance_current
 
         if self.eaten_apple():
             self.update_eating_apple()
-            self.loss += EAT_APPLE_SCORE
+            self.loss += self.eat_apple_score
             self.steps_without_apple = 0
         else:
             self.steps_without_apple += 1
 
-        self.input_vector = compute_input_vector(apple=self.apple, snake=self.snake)
+        self.input_vector = InputVector(snake=self.snake, apple=self.apple).compute()
         self.steps_total += 1
 
         return True
 
     def distance_to_apple(self):
-        dx_to_right_edge = min(DISPLAY_WIDTH - self.snake.x[0], DISPLAY_WIDTH - self.apple.x)
+        dx_to_right_edge = min(self.width - self.snake.x[0], self.width - self.apple.x)
         dx_outer = dx_to_right_edge + min(self.snake.x[0], self.apple.x)
-        dy_to_bottom_edge = min(DISPLAY_HEIGHT - self.snake.y[0], DISPLAY_HEIGHT - self.apple.y)
+        dy_to_bottom_edge = min(self.height - self.snake.y[0], self.height - self.apple.y)
         dy_outer = dy_to_bottom_edge + min(self.snake.y[0], self.apple.y)
 
         dx_shortest = min(abs(self.apple.x - self.snake.x[0]), dx_outer)
@@ -283,13 +276,13 @@ class GameNeuralNet(Game):
 
     def collided(self) -> bool:
         if self.collided_with_itself() or self.collided_with_boundary():
-            self.loss -= COLLISION_PENALTY
+            self.loss -= self.collision_penalty
             return True
         return False
 
     def _get_direction(self) -> int:
-        prediction = self.nn.activate(self.input_vector)
+        prediction = self.neural_net.activate(self.input_vector)
         assert type(np.argmax(prediction)) == np.int64, "{} is multiple maximal values"
         direction = int(np.argmax(prediction))
-        self.exploration_score[direction] += 1
+        self.direction_counts[direction] += 1
         return direction
