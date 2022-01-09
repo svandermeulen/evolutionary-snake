@@ -3,99 +3,102 @@
 Written by: sme30393
 Date: 17/10/2021
 """
-
-import numpy as np
-
 from src.game.object_builder import Snake, Apple
-from src.config import DISPLAY_WIDTH, DISPLAY_HEIGHT, STEP_SIZE
-from src.config import BOUNDARY
 
 
-def respect_to_apple(apple: Apple, snake: Snake) -> np.ndarray:
-    vector = np.zeros(4)
+class InputVector:
 
-    # is the apple to the left
-    if apple.x < snake.x[0]:
-        vector[0] = 1
+    def __init__(self, snake: Snake, apple: Apple):
 
-    # is the apple to the right
-    if apple.x > snake.x[0]:
-        vector[1] = 1
+        self.snake = snake
+        self.apple = apple
+        self.width = self.snake.width
+        self.height = self.snake.height
+        self.step_size = self.snake.step_size
+        self.boundary = self.snake.boundary
+        self.snake_coordinates = self.list_snake_coordinates()
 
-    # is the apple above
-    if apple.y < snake.y[1]:
-        vector[2] = 1
+    def compute(self) -> list:
 
-    # is the apple below
-    if apple.y > snake.y[1]:
-        vector[3] = 1
+        vector_apple = self.respect_to_apple()
+        vector_collision_object = self.check_sides()
+        return vector_apple + vector_collision_object
 
-    return vector
+    def respect_to_apple(self) -> list:
+        return [
+            self.apple.x < self.snake.x[0],
+            self.apple.x > self.snake.x[0],
+            self.apple.y < self.snake.y[0],
+            self.apple.y > self.snake.y[0]
+        ]
 
+    def check_sides(self) -> list:
+        return [self.side_clear(side=side) for side in ["right", "left", "bottom", "top"]]
 
-def _right_edge_clear(snake: Snake) -> bool:
-    if BOUNDARY and snake.x[0] == DISPLAY_WIDTH:
-        return False
-    if snake.x[0] == 0 and any([a == DISPLAY_WIDTH - STEP_SIZE for a in snake.x[1:snake.length]]) and \
-            any([a == snake.y[0] for a in snake.y[1:snake.length]]):
-        return False
-    return True
+    def side_clear(self, side: str) -> bool:
 
+        if side == "right":
+            return self.right_side_clear()
+        elif side == "left":
+            return self.left_side_clear()
+        elif side == "top":
+            return self.top_side_clear()
+        return self.bottom_side_clear()
 
-def _left_edge_clear(snake: Snake) -> bool:
-    if BOUNDARY and snake.x[0] == 0:
-        return False
-    if snake.x[0] == DISPLAY_WIDTH - STEP_SIZE and any([a == 0 for a in snake.x[1:snake.length]]) and \
-            any([a == snake.y[0] for a in snake.y[1:snake.length]]):
-        return False
-    return True
+    def list_snake_coordinates(self):
+        return [(x, y) for x, y in zip(self.snake.x[:self.snake.length], self.snake.y[:self.snake.length])]
 
+    def right_side_clear(self) -> bool:
+        if self.boundary and self.snake.x[0] == self.width:
+            return False
+        if self.periodic_obstruction_horizontal(edge=self.width - self.step_size, x_obstruction=0):
+            return False
+        if self.snake_obstruction_horizontal(x_obstruction=self.snake.x[0] + self.step_size):
+            return False
+        return True
 
-def _bottom_edge_clear(snake: Snake) -> bool:
-    if BOUNDARY and snake.y[0] == DISPLAY_HEIGHT:
-        return False
-    if snake.y[0] == 0 and any([a == DISPLAY_HEIGHT - STEP_SIZE for a in snake.y[1:snake.length]]) and \
-            any([a == snake.x[0] for a in snake.x[1:snake.length]]):
-        return False
-    return True
+    def left_side_clear(self) -> bool:
+        if self.boundary and self.snake.x[0] == 0:
+            return False
+        if self.periodic_obstruction_horizontal(edge=0, x_obstruction=self.width - self.step_size):
+            return False
+        if self.snake_obstruction_horizontal(x_obstruction=self.snake.x[0] - self.step_size):
+            return False
+        return True
 
+    def bottom_side_clear(self):
+        if self.boundary and self.snake.y[0] == self.height:
+            return False
+        if self.periodic_obstruction_vertical(edge=self.height - self.step_size, y_obstruction=0):
+            return False
+        if self.snake_obstruction_vertical(y_obstruction=self.snake.y[0] + self.step_size):
+            return False
+        return True
 
-def _top_edge_clear(snake: Snake) -> bool:
-    if BOUNDARY and snake.y[0] == 0:
-        return False
-    if snake.y[0] == DISPLAY_HEIGHT - STEP_SIZE and any([a == 0 for a in snake.y[1:snake.length]]) and \
-            any([a == snake.x[0] for a in snake.x[1:snake.length]]):
-        return False
-    return True
+    def top_side_clear(self):
+        if self.boundary and self.snake.y[0] == 0:
+            return False
+        if self.periodic_obstruction_vertical(edge=0, y_obstruction=self.height - self.step_size):
+            return False
+        if self.snake_obstruction_vertical(y_obstruction=self.snake.y[0] - self.step_size):
+            return False
+        return True
 
+    def periodic_obstruction_horizontal(self, edge: int, x_obstruction: int) -> bool:
+        return self.snake.x[0] == edge and any(
+            [x == x_obstruction and y == self.snake.y[0] for x, y in self.snake_coordinates[1:]]
+        )
 
-def respect_to_self(snake: Snake) -> np.ndarray:
-    vector = np.zeros(4)
-    snake_coordinates = [(a, b) for a, b in zip(snake.x[:snake.length], snake.y[:snake.length])]
+    def periodic_obstruction_vertical(self, edge: int, y_obstruction: int) -> bool:
+        return self.snake.y[0] == edge and any(
+            [x == self.snake.x[0] and y == y_obstruction for x, y in self.snake_coordinates[1:]]
+        )
 
-    # is it clear to the left?
-    if _right_edge_clear(snake) and not any([a == (snake.x[0] - STEP_SIZE, snake.y[0]) for a in snake_coordinates]):
-        vector[0] = 1
+    def snake_obstruction_horizontal(self, x_obstruction: int) -> bool:
+        return any([a == (x_obstruction, self.snake.y[0]) for a in self.snake_coordinates])
 
-    # is it clear to the right
-    if _left_edge_clear(snake) and not any([a == (snake.x[0] + STEP_SIZE, snake.y[0]) for a in snake_coordinates]):
-        vector[1] = 1
-
-    # is it clear above
-    if _bottom_edge_clear(snake) and not any([a == (snake.x[0], snake.y[0] - STEP_SIZE) for a in snake_coordinates]):
-        vector[2] = 1
-
-    # is it clear below
-    if _top_edge_clear(snake) and not any([a == (snake.x[0], snake.y[0] + STEP_SIZE) for a in snake_coordinates]):
-        vector[3] = 1
-
-    return vector
-
-
-def compute_input_vector(apple: Apple, snake: Snake) -> list:
-    vector = respect_to_apple(apple=apple, snake=snake)
-    vector = np.append(vector, respect_to_self(snake=snake))
-    return list(vector)
+    def snake_obstruction_vertical(self, y_obstruction: int) -> bool:
+        return any([a == (self.snake.x[0], y_obstruction) for a in self.snake_coordinates])
 
 
 def main():
