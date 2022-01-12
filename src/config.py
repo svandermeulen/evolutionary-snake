@@ -11,7 +11,7 @@ from typing import List, Tuple
 
 @dataclass
 class Config:
-    human_player: bool = True
+    human_player: bool = False
     run_in_parallel: bool = True
 
     game_size: int = 1 if not human_player else 3
@@ -20,12 +20,12 @@ class Config:
     display_width: int = 100 * game_size
     display_height: int = 100 * game_size
     boundary: bool = False
-    frame_rate: float = 50 / 500  # if human_player else none
+    frame_rate: float = 1 / 10 if human_player else 1/10
 
     # neuroevolution settings
     screens_per_row: int = 10
-    step_limit: int = np.inf if human_player else 200
-    generations: int = 50
+    step_limit: int = np.inf if human_player else 50
+    generations: int = 100
     eat_apple_score: int = 100
     approaching_score: int = 1
     retracting_penalty: int = 1.5

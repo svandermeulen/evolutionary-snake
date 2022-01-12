@@ -70,6 +70,7 @@ class Game(ABC):
 
     def cleanup(self) -> None:
         self.process_score()
+        self.render()
         pygame.quit()
 
     @staticmethod
@@ -111,6 +112,7 @@ class Game(ABC):
             coordinates_grid=self.coordinates_grid,
             coordinates_boundary=self.coordinates_boundary
         )
+        print(self.apple.x, self.apple.y)
         self.score = self.snake.length - self.snake_length
 
     @staticmethod
@@ -169,7 +171,10 @@ class Game(ABC):
 
 
 class GameHumanPlayer(Game):
-    name: str = "Human player"
+
+    def __init__(self, config: Config):
+        super().__init__(config=config)
+        self.name = "Human player"
 
     def game_ending_conditions_other(self) -> bool:
         return False
@@ -224,9 +229,14 @@ class GameNeuralNet(Game):
         exploration_minimum = min(self.direction_counts.values())
         if exploration_minimum > 0:
             print(f"{self.name} utilized all directions at least {exploration_minimum} times.")
-            self.loss *= exploration_minimum
+            self.loss *= np.sqrt(exploration_minimum + 1)
 
-        print(f"{self.name} finished with loss: {self.loss}")
+        print(
+            f"{self.name} finished with:\n\t"
+            f"steps total: {self.steps_total}\n\t"
+            f"loss: {self.loss}\n\t"
+            f"score: {self.score}"
+        )
 
     def game_ending_conditions_other(self) -> bool:
 

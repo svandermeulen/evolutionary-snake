@@ -52,7 +52,7 @@ def main():
     else:
         GameHumanPlayer(config=config).execute()
 
-    # move all created output visualizations and checkpoints
+    # move all created output visualizations and checkpoints to desired output folder
     [shutil.move(p, os.path.join(path_output, p)) for p in os.listdir(".") if
      os.path.isfile(p) and not p.endswith(".py")]
 
@@ -60,11 +60,10 @@ def main():
 
 
 if __name__ == "__main__":
+    config = Config()
+    path_run = os.path.abspath("D:/Stack/stef/software/python/snake/output/20220112_210648")
+    path_checkpoint = os.path.join(path_run, "neat-checkpoint-99")
+    path_config = os.path.join(path_run, "neat_config")
+    run_checkpoint(path_checkpoint, path_config, config_game=config)
 
-    # config = Config()
-    # path_run = os.path.abspath("D:/Stack/stef/software/python/snake/output/20220110_145705")
-    # path_checkpoint = os.path.join(path_run, "neat-checkpoint-21")
-    # path_config = os.path.join(path_run, "neat_config")
-    # run_checkpoint(path_checkpoint, path_config, config_game=config)
-
-    main()
+    # main()

@@ -56,7 +56,7 @@ def eval_genomes_parallel(genomes: list, config_neat: neat.config.Config):
 
     assert hasattr(eval_genomes_parallel, "counter"), "Callable 'eval_genomes_parallel' has no attribute 'counter'"
     generation = eval_genomes_parallel.counter
-    step_limit = config_game.step_limit + (generation - (generation % 5)) * 20
+    step_limit = config_game.step_limit + (generation - (generation % 5)) * 2
 
     genome_dict = multiprocessing.Manager().dict()
     for i, (genome_id, genome) in enumerate(genomes):
@@ -139,7 +139,7 @@ def run_evolution(path_neat_config: str, path_checkpoint: str, config_game: Conf
     return best_genome
 
 
-def run_genome(winner, path_neat_config: str, config_game: Config):
+def run_genome(winner, path_neat_config: str, config_game: Config) -> bool:
     neat_config = get_neat_config(path_neat_config=path_neat_config)
     winner_net = neat.nn.FeedForwardNetwork.create(winner, neat_config)
     the_app = GameNeuralNet(
@@ -147,9 +147,8 @@ def run_genome(winner, path_neat_config: str, config_game: Config):
         name="best_genome",
         neural_net=winner_net
     )
+    the_app.execute()
 
-    final_score = the_app.execute()
-
-    print("The best genome scored {} points".format(final_score))
+    print("The best genome scored {} points".format(the_app.score))
 
     return True
