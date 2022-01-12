@@ -60,7 +60,7 @@ class InputVector:
     def left_side_clear(self) -> bool:
         if self.boundary and self.snake.x[0] == 0:
             return False
-        if self.periodic_obstruction_horizontal(edge=0, x_obstruction=self.width - self.step_size):
+        if self.periodic_obstruction_horizontal(edge=0, x_obstruction=self.width):
             return False
         if self.snake_obstruction_horizontal(x_obstruction=self.snake.x[0] - self.step_size):
             return False
@@ -69,7 +69,7 @@ class InputVector:
     def bottom_side_clear(self):
         if self.boundary and self.snake.y[0] == self.height:
             return False
-        if self.periodic_obstruction_vertical(edge=self.height - self.step_size, y_obstruction=0):
+        if self.periodic_obstruction_vertical(edge=0, y_obstruction=self.height - self.step_size):
             return False
         if self.snake_obstruction_vertical(y_obstruction=self.snake.y[0] + self.step_size):
             return False
@@ -78,7 +78,7 @@ class InputVector:
     def top_side_clear(self):
         if self.boundary and self.snake.y[0] == 0:
             return False
-        if self.periodic_obstruction_vertical(edge=0, y_obstruction=self.height - self.step_size):
+        if self.periodic_obstruction_vertical(edge=self.height - self.step_size, y_obstruction=0):
             return False
         if self.snake_obstruction_vertical(y_obstruction=self.snake.y[0] - self.step_size):
             return False
