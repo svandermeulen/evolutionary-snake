@@ -15,12 +15,12 @@ from src.config import Config
 from src.paths import Paths
 
 
-def run_checkpoint(path_checkpoint: str, path_neat_config: str):
+def run_checkpoint(path_checkpoint: str, path_neat_config: str, config_game: Config):
     population = Checkpointer.restore_checkpoint(path_checkpoint).population
     d = {k: v.fitness for k, v in population.items() if v.fitness is not None}
     best_genome_key = max(d.items(), key=operator.itemgetter(1))[0]
     best_genome = population[best_genome_key]
-    run_genome(winner=best_genome, path_neat_config=path_neat_config)
+    run_genome(winner=best_genome, path_neat_config=path_neat_config, config_game=config_game)
 
     return True
 
@@ -61,9 +61,10 @@ def main():
 
 if __name__ == "__main__":
 
-    # path_run = os.path.abspath("D:/Stack/stef/software/python/snake/output/20220104_143650")
-    # path_checkpoint = os.path.join(path_run, "neat-checkpoint-20")
-    # path_config = os.path.join(path_run, "neat_config")
-    # run_checkpoint(path_checkpoint, path_config)
+    config = Config()
+    path_run = os.path.abspath("D:/Stack/stef/software/python/snake/output/20220110_145705")
+    path_checkpoint = os.path.join(path_run, "neat-checkpoint-21")
+    path_config = os.path.join(path_run, "neat_config")
+    run_checkpoint(path_checkpoint, path_config, config_game=config)
 
     main()
