@@ -51,6 +51,7 @@ class Game(ABC):
 
     def execute(self) -> bool:
 
+        pygame.init()
         while self.game_continues():
             self.loop()
             self.render()
@@ -189,9 +190,6 @@ class GameHumanPlayer(Game):
     def _loop(self):
         if self.eaten_apple():
             self.update_eating_apple()
-
-        iv = InputVector(snake=self.snake, apple=self.apple)
-        print(f"top side clear: {iv.top_side_clear()}")
 
     def process_score(self):
         print(f"{self.name} score: {self.score}")

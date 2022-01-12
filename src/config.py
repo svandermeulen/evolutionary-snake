@@ -11,7 +11,7 @@ from typing import List, Tuple
 
 @dataclass
 class Config:
-    human_player: bool = False
+    human_player: bool = True
     run_in_parallel: bool = True
 
     game_size: int = 1 if not human_player else 3
