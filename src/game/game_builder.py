@@ -22,7 +22,6 @@ os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 class Game(ABC):
 
     def __init__(self, config: Config):
-        pygame.init()
         self.name = ""
         self.width = config.display_width
         self.height = config.display_height
@@ -61,11 +60,8 @@ class Game(ABC):
 
         return True
 
-    def render_canvas(self):
-        self.canvas.draw(score=self.score, loss=self.loss, snake=self.snake, apple=self.apple)
-
     def render(self) -> None:
-        self.render_canvas()
+        self.canvas.draw(score=self.score, loss=self.loss, snake=self.snake, apple=self.apple)
 
     @abstractmethod
     def process_score(self):

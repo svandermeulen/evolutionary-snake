@@ -10,7 +10,11 @@ from src.game.object_builder import Snake, Apple
 class Canvas:
 
     @staticmethod
-    def draw(snake: Snake, apple: Apple, score: int = None, loss: int = None) -> pygame.Surface:
+    def draw(snake: Snake, apple: Apple = None, score: int = None, loss: int = None) -> pygame.Surface:
+
+        if not pygame.get_init():
+            pygame.init()
+
         canvas = pygame.display.set_mode((snake.width, snake.height + snake.step_size), pygame.HWSURFACE)
         canvas.fill((255, 255, 255))
 
@@ -18,8 +22,9 @@ class Canvas:
         for i in range(0, snake.length):
             canvas.blit(image_snake, (snake.x[i], snake.y[i]))
 
-        image_apple = MySurface(w=snake.step_size, h=snake.step_size, rgb=(150, 0, 0)).create()
-        canvas.blit(image_apple, (apple.x, apple.y))
+        if apple is not None:
+            image_apple = MySurface(w=snake.step_size, h=snake.step_size, rgb=(150, 0, 0)).create()
+            canvas.blit(image_apple, (apple.x, apple.y))
 
         if score is not None:
             score_font = MyFont(x=4 * snake.width // 5, y=snake.height - 2, rgb=(0, 0, 0), font_size=8)
