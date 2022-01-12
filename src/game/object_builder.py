@@ -2,9 +2,11 @@
 Created on: 8-2-2018
 @author: Stef
 """
+import datetime
+
 import numpy as np
 
-from random import choice
+from random import choice, seed
 
 
 class Snake:
@@ -82,4 +84,5 @@ class Apple:
                        c not in coordinates_snake]  # apple cannot be generated on top of snake
         coordinates = [c for c in coordinates if
                        c not in self.coordinates_boundary]  # apple cannot be generated on top of boundary
+        seed(datetime.datetime.now())
         return choice(coordinates)
