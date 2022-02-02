@@ -25,23 +25,27 @@ def run_checkpoint(path_checkpoint: str, path_neat_config: str, config_game: Con
     return True
 
 
-def main():
+def main(mode: str, run_datetime: str = None, neat_checkpoint: str = None) -> bool:
 
-    config = Config()
+    config = Config(mode=mode)
     paths = Paths()
 
-    datetime_run = datetime.strftime(datetime.now(), "%Y%m%d_%H%M%S")
-    path_output = os.path.join(paths.path_output, datetime_run)
-    os.mkdir(path_output)
+    if mode == "human_player":
+        GameHumanPlayer(config=config).execute()
+        return True
 
-    if not os.path.isdir(paths.path_output_temp):
-        os.mkdir(paths.path_output_temp)
-    [os.remove(os.path.join(paths.path_output_temp, p)) for p in os.listdir(paths.path_output_temp) if
-     os.path.isfile(os.path.join(paths.path_output_temp, p))]
+    elif mode == "train":
+        datetime_run = datetime.strftime(datetime.now(), "%Y%m%d_%H%M%S")
+        path_output = os.path.join(paths.path_output, datetime_run)
+        os.mkdir(path_output)
 
-    path_neat_config = os.path.join(paths.path_input, "neat_config")
+        if not os.path.isdir(paths.path_output_temp):
+            os.mkdir(paths.path_output_temp)
+        [os.remove(os.path.join(paths.path_output_temp, p)) for p in os.listdir(paths.path_output_temp) if
+         os.path.isfile(os.path.join(paths.path_output_temp, p))]
 
-    if not config.human_player:
+        path_neat_config = os.path.join(paths.path_input, "neat_config")
+
         best_genome = run_evolution(
             path_neat_config=path_neat_config,
             path_checkpoint=os.path.join(path_output, "neat-checkpoint-"),
@@ -49,21 +53,25 @@ def main():
         )
         print('\nBest genome:\n{!s}'.format(best_genome))
         run_genome(winner=best_genome, path_neat_config=path_neat_config, config_game=config)
-    else:
-        GameHumanPlayer(config=config).execute()
 
-    # move all created output visualizations and checkpoints to desired output folder
-    [shutil.move(p, os.path.join(path_output, p)) for p in os.listdir(".") if
-     os.path.isfile(p) and not p.endswith(".py")]
+        # move all created output visualizations and checkpoints to desired output folder
+        [shutil.move(p, os.path.join(path_output, p)) for p in os.listdir(".") if
+         os.path.isfile(p) and not p.endswith(".py")]
+        return True
+
+    elif mode == "ai_player":
+        path_run = os.path.join(paths.path_output, run_datetime)
+        path_checkpoint = os.path.join(path_run, neat_checkpoint)
+        path_config = os.path.join(path_run, "neat_config")
+        return run_checkpoint(path_checkpoint, path_config, config_game=config)
+
+    else:
+        print(f"Invalid mode {mode} given")
 
     return True
 
 
 if __name__ == "__main__":
-    config = Config()
-    path_run = os.path.abspath("D:/Stack/stef/software/python/snake/output/20220112_210648")
-    path_checkpoint = os.path.join(path_run, "neat-checkpoint-99")
-    path_config = os.path.join(path_run, "neat_config")
-    run_checkpoint(path_checkpoint, path_config, config_game=config)
 
-    # main()
+    game_mode = "train"
+    main(mode=game_mode)

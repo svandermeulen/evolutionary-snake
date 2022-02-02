@@ -9,27 +9,30 @@ from dataclasses import dataclass
 from typing import List, Tuple
 
 
-@dataclass
 class Config:
-    human_player: bool = False
-    run_in_parallel: bool = True
 
-    game_size: int = 1 if not human_player else 3
-    step_size: int = 5 * game_size
-    snake_length: int = 3
-    display_width: int = 100 * game_size
-    display_height: int = 100 * game_size
-    boundary: bool = False
-    frame_rate: float = 1 / 10 if human_player else 1/10
+    def __init__(self, mode: str):
 
-    # neuroevolution settings
-    screens_per_row: int = 10
-    step_limit: int = np.inf if human_player else 50
-    generations: int = 100
-    eat_apple_score: int = 100
-    approaching_score: int = 1
-    retracting_penalty: int = 1.5
-    collision_penalty: int = 1000
+        self.mode: str = mode
+        self.human_player: bool = True if mode == "human_player" else False
+        self.run_in_parallel: bool = True
+
+        self.game_size: int = 1 if not self.human_player else 3
+        self.step_size: int = 5 * self.game_size
+        self.snake_length: int = 3
+        self.display_width: int = 100 * self.game_size
+        self.display_height: int = 100 * self.game_size
+        self.boundary: bool = False
+        self.frame_rate: float = 1 / 10 if self.human_player else None
+
+        # neuroevolution settings
+        self.screens_per_row: int = 10
+        self.step_limit: int = np.inf if self.human_player else 50
+        self.generations: int = 100
+        self.eat_apple_score: int = 100
+        self.approaching_score: int = 1
+        self.retracting_penalty: float = 1.5
+        self.collision_penalty: int = 1000
 
     def get_coordinates_grid(self) -> List[Tuple[int, int]]:
         x_list = list(range(0, self.display_width + self.step_size, self.step_size))

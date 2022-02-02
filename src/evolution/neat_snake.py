@@ -41,7 +41,7 @@ def play_snake(
 
 
 def eval_genomes_sequential(genomes: list, config_neat: neat.config.Config) -> bool:
-    config_game = Config()
+    config_game = Config(mode="train")
     for (genome_id, genome) in genomes:
         _ = play_snake(genome=genome, snake_id=genome_id, config_game=config_game, config_neat=config_neat)
 
@@ -52,7 +52,7 @@ def eval_genomes_parallel(genomes: list, config_neat: neat.config.Config):
     display_y = 100
     jobs = []
     job_names = {}
-    config_game = Config()
+    config_game = Config(mode="train")
 
     assert hasattr(eval_genomes_parallel, "counter"), "Callable 'eval_genomes_parallel' has no attribute 'counter'"
     generation = eval_genomes_parallel.counter

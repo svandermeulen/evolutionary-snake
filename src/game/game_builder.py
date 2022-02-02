@@ -112,7 +112,6 @@ class Game(ABC):
             coordinates_grid=self.coordinates_grid,
             coordinates_boundary=self.coordinates_boundary
         )
-        print(self.apple.x, self.apple.y)
         self.score = self.snake.length - self.snake_length
 
     @staticmethod
