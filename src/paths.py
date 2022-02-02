@@ -5,16 +5,19 @@ Date: 09/01/2022
 """
 
 import os
-from dataclasses import dataclass
 
 
-@dataclass
 class Paths:
 
-    path_home = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    path_input = os.path.join(path_home, "input")
-    path_output = os.path.join(path_home, "output")
-    path_output_temp = os.path.join(path_output, "temp")
+    def __init__(self, datetime_run: str):
+        self.path_home = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.path_input = os.path.join(self.path_home, "input")
+        self.path_output = os.path.join(self.path_home, "output", datetime_run)
+        self.path_neat_config = os.path.join(self.path_input, "neat_config")
+        self.path_checkpoint_prefix = os.path.join(self.path_output, "neat-checkpoint-")
+
+        if not os.path.isdir(self.path_output):
+            os.makedirs(self.path_output)
 
 
 def main():

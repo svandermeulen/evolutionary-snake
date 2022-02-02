@@ -26,7 +26,7 @@ class Game(ABC):
         self.width = config.display_width
         self.height = config.display_height
         self.step_size: int = config.step_size
-        self.snake_length: int = config.snake_length
+        self.snake_length: int = config.snake_length_init
         self.boundary = config.boundary
         self.coordinates_grid = config.get_coordinates_grid()
         self.coordinates_boundary = config.get_coordinates_boundary()

@@ -4,11 +4,16 @@ Created on: 25-6-2018
 """
 
 import copy
+import os
 import warnings
 
 import graphviz
 import matplotlib.pyplot as plt
+import neat
 import numpy as np
+from neat import StatisticsReporter, DefaultGenome
+
+from src.paths import Paths
 
 
 def plot_stats(statistics, ylog=False, view=False, filename='avg_fitness.svg'):
@@ -198,3 +203,28 @@ def draw_net(config, genome, view=False, filename=None, directory=None, node_nam
     dot.render(filename=filename, directory=directory, view=view)
 
     return dot
+
+
+def generate_plots(checkpoint_prefix: str, config_neat: neat.Config, best_genome: DefaultGenome, node_names: dict,
+                   stats: StatisticsReporter) -> bool:
+    draw_net(
+        config=config_neat,
+        genome=best_genome,
+        view=True,
+        node_names=node_names,
+        directory=os.path.dirname(checkpoint_prefix)
+    )
+
+    plot_stats(
+        stats,
+        ylog=False,
+        view=True,
+        filename=os.path.join(os.path.dirname(checkpoint_prefix), "avg_fitness.svg")
+    )
+
+    plot_species(
+        stats,
+        view=True,
+        filename=os.path.join(os.path.dirname(checkpoint_prefix), "speciation.svg")
+    )
+    return True

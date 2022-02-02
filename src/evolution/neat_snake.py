@@ -7,11 +7,10 @@ import neat
 import os
 
 from multiprocessing import Process
-from neat import DefaultGenome
+from neat import DefaultGenome, StatisticsReporter
 
 from src.config import Config
 from src.game.game_builder import GameNeuralNet
-from src.visualisation import visualize
 
 
 def play_snake(
@@ -93,16 +92,8 @@ def eval_genomes_parallel(genomes: list, config_neat: neat.config.Config):
     return True
 
 
-def get_neat_config(path_neat_config: str) -> neat.Config:
-    return neat.Config(
-        genome_type=neat.DefaultGenome, reproduction_type=neat.DefaultReproduction,
-        species_set_type=neat.DefaultSpeciesSet, stagnation_type=neat.DefaultStagnation, filename=path_neat_config
-    )
-
-
-def run_evolution(path_neat_config: str, path_checkpoint: str, config_game: Config):
-    config_neat = get_neat_config(path_neat_config=path_neat_config)
-    config_neat.save(os.path.join(os.path.dirname(path_checkpoint), "neat_config"))
+def run_evolution(config_game: Config, config_neat: neat.config, checkpoint_prefix: str) -> \
+        (DefaultGenome, StatisticsReporter):
 
     # Create the population, which is the top-level object for a NEAT run.
     p = neat.Population(config_neat)
@@ -111,44 +102,26 @@ def run_evolution(path_neat_config: str, path_checkpoint: str, config_game: Conf
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-    p.add_reporter(neat.Checkpointer(generation_interval=1, filename_prefix=path_checkpoint))
+    p.add_reporter(neat.Checkpointer(generation_interval=1, filename_prefix=checkpoint_prefix))
 
     if config_game.run_in_parallel:
-        # Run for up to n generations.
         eval_genomes_parallel.counter = 0
         best_genome = p.run(eval_genomes_parallel, n=config_game.generations)
     else:
         best_genome = p.run(eval_genomes_sequential, n=config_game.generations)
 
-    node_names = {
-        -1: 'Apple_left', -2: 'Apple_right', -3: "Apple_up", -4: "Apple_down",
-        -5: "Right_clear", -6: "Left_clear", -7: "Bottom_clear", -8: "Up_clear",
-        0: "RIGHT", 1: "LEFT", 2: "UP", 3: "DOWN"
-    }
-    visualize.draw_net(
-        config=config_neat,
-        genome=best_genome,
-        view=True,
-        node_names=node_names,
-        directory=os.path.dirname(path_checkpoint)
-    )
-    visualize.plot_stats(stats, ylog=False, view=True,
-                         filename=os.path.join(os.path.dirname(path_checkpoint), "avg_fitness.svg"))
-    visualize.plot_species(stats, view=True, filename=os.path.join(os.path.dirname(path_checkpoint), "speciation.svg"))
-
-    return best_genome
+    return best_genome, stats
 
 
-def run_genome(winner, path_neat_config: str, config_game: Config) -> bool:
-    neat_config = get_neat_config(path_neat_config=path_neat_config)
-    winner_net = neat.nn.FeedForwardNetwork.create(winner, neat_config)
-    the_app = GameNeuralNet(
+def run_genome(winner, config_game: Config, config_neat: neat.Config) -> bool:
+    winner_net = neat.nn.FeedForwardNetwork.create(winner, config_neat)
+    game = GameNeuralNet(
         config=config_game,
         name="best_genome",
         neural_net=winner_net
     )
-    the_app.execute()
+    game.execute()
 
-    print("The best genome scored {} points".format(the_app.score))
+    print("The best genome scored {} points".format(game.score))
 
     return True
