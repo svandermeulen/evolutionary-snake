@@ -77,8 +77,8 @@ def main(mode: str, datetime_run: str = None, checkpoint: int = None) -> bool:
 
 
 if __name__ == "__main__":
-    game_mode = "train"
+    game_mode = "ai_player"
     assert game_mode in MODES_ALLOWED, f"Given game mode is not valid: {game_mode}"
 
     print("=" * 20, f" running mode: {game_mode} ", "=" * 20)
-    main(mode=game_mode, datetime_run="20220202_113524", checkpoint=2)
+    main(mode=game_mode, datetime_run="20220202_115237", checkpoint=49)

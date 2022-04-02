@@ -5,7 +5,6 @@ Created on: 8-2-2018
 import itertools
 import numpy as np
 
-from dataclasses import dataclass
 from typing import List, Tuple
 
 
