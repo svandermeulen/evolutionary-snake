@@ -14,7 +14,9 @@ class Config:
 
         self.mode: str = mode
         self.human_player: bool = True if mode == "human_player" else False
+        self.ai_player: bool = True if mode == "ai_player" else False
         self.run_in_parallel: bool = True
+        self.run_in_background: bool = True
 
         self.game_size: int = 1 if mode == "train" else 3
         self.step_size: int = 5 * self.game_size

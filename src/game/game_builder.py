@@ -23,6 +23,7 @@ class Game(ABC):
 
     def __init__(self, config: Config):
         self.name = ""
+        self.run_in_background = config.run_in_background and not (config.human_player or config.ai_player)
         self.width = config.display_width
         self.height = config.display_height
         self.step_size: int = config.step_size
@@ -62,6 +63,8 @@ class Game(ABC):
         return True
 
     def render(self) -> None:
+        if self.run_in_background:
+            return
         self.canvas.draw(score=self.score, loss=self.loss, snake=self.snake, apple=self.apple)
 
     @abstractmethod
@@ -89,14 +92,14 @@ class Game(ABC):
     def collided_with_boundary(self) -> bool:
         if self.boundary:
             if (self.snake.x[0], self.snake.y[0]) in self.coordinates_boundary:
-                print(f"{self.name} collided with the boundary")
+                # print(f"{self.name} collided with the boundary")
                 return True
         return False
 
     def collided_with_itself(self) -> bool:
 
         if any([self.snake.x[0] == x and self.snake.y[0] == y for x, y in zip(self.snake.x[1:], self.snake.y[1:])]):
-            print(f"{self.name} collided with itself")
+            # print(f"{self.name} collided with itself")
             return True
         return False
 
@@ -196,7 +199,8 @@ class GameHumanPlayer(Game):
             self.update_eating_apple()
 
     def process_score(self):
-        print(f"{self.name} score: {self.score}")
+        # print(f"{self.name} score: {self.score}")
+        return
 
 
 class GameNeuralNet(Game):
@@ -227,20 +231,21 @@ class GameNeuralNet(Game):
         self.loss += self.steps_total
         exploration_minimum = min(self.direction_counts.values())
         if exploration_minimum > 0:
-            print(f"{self.name} utilized all directions at least {exploration_minimum} times.")
+            # print(f"{self.name} utilized all directions at least {exploration_minimum} times.")
             self.loss *= np.sqrt(exploration_minimum + 1)
 
-        print(
-            f"{self.name} finished with:\n\t"
-            f"steps total: {self.steps_total}\n\t"
-            f"loss: {self.loss}\n\t"
-            f"score: {self.score}"
-        )
+        # print(
+        #     f"{self.name} finished with:\n\t"
+        #     f"steps total: {self.steps_total}\n\t"
+        #     f"loss: {self.loss}\n\t"
+        #     f"score: {self.score}"
+        # )
+        return
 
     def game_ending_conditions_other(self) -> bool:
 
         if self.steps_without_apple >= self.step_limit >= 0:
-            print(f"{self.name} played too long without eating apple")
+            # print(f"{self.name} played too long without eating apple")
             return True
         return False
 

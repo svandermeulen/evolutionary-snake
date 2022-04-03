@@ -81,4 +81,4 @@ if __name__ == "__main__":
     assert game_mode in MODES_ALLOWED, f"Given game mode is not valid: {game_mode}"
 
     print("=" * 20, f" running mode: {game_mode} ", "=" * 20)
-    main(mode=game_mode, datetime_run="20220202_115237", checkpoint=49)
+    main(mode=game_mode, datetime_run="20220403_115102", checkpoint=49)

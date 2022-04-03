@@ -23,6 +23,7 @@ def play_snake(
         y: int = 30
 ) -> dict:
 
+    genome_dict = genome_dict if genome_dict is not None else {}
     os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (x, y)
 
     genome.fitness = 1000
