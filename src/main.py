@@ -5,9 +5,11 @@ Created on: 13-7-2018
 import neat
 import operator
 import os
+import plotly as py
 
 from datetime import datetime
 from neat.checkpoint import Checkpointer
+from plotly.graph_objs import Figure
 
 from src.evolution.neat_snake import run_evolution, run_genome
 from src.game.game_builder import GameHumanPlayer
@@ -35,6 +37,14 @@ def run_checkpoint(checkpoint: dict, config_neat: neat.Config, config_game: Conf
     return True
 
 
+def write_plotly_figure(fig: Figure, path_html: str, auto_open: bool = False, **kwargs) -> bool:
+
+    fig.update_layout(template="plotly_white")
+    py.offline.plot(fig, filename=path_html, auto_open=auto_open, show_link=True, **kwargs)
+    print(f"Written plot to {path_html}")
+    return True
+
+
 def main(mode: str, datetime_run: str = None, checkpoint: int = None) -> bool:
     datetime_run = datetime_run if datetime_run is not None and mode == "ai_player" else \
         datetime.strftime(datetime.now(), "%Y%m%d_%H%M%S")
@@ -53,14 +63,11 @@ def main(mode: str, datetime_run: str = None, checkpoint: int = None) -> bool:
             checkpoint_prefix=paths.path_checkpoint_prefix
         )
 
-        config_neat.save(os.path.join(os.path.dirname(paths.path_checkpoint_prefix), "neat_config"))
-        generate_plots(
-            config_neat=config_neat,
-            checkpoint_prefix=paths.path_checkpoint_prefix,
-            best_genome=best_genome,
-            node_names=config_game.node_names,
-            stats=stats
-        )
+        config_neat.save(os.path.join(paths.path_output, "neat_config"))
+        dot, fig = generate_plots(config_neat=config_neat, best_genome=best_genome, node_names=config_game.node_names, stats=stats)
+        dot.render(filename=os.path.join(paths.path_output, "digraph.svg"))
+        write_plotly_figure(fig=fig, path_html=os.path.join(paths.path_output, "statistics.html"))
+
         print('\nBest genome:\n{!s}'.format(best_genome))
 
         return True
@@ -77,7 +84,7 @@ def main(mode: str, datetime_run: str = None, checkpoint: int = None) -> bool:
 
 
 if __name__ == "__main__":
-    game_mode = "ai_player"
+    game_mode = "train"
     assert game_mode in MODES_ALLOWED, f"Given game mode is not valid: {game_mode}"
 
     print("=" * 20, f" running mode: {game_mode} ", "=" * 20)

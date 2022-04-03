@@ -4,146 +4,76 @@ Created on: 25-6-2018
 """
 
 import copy
-import os
-import warnings
 
 import graphviz
-import matplotlib.pyplot as plt
 import neat
 import numpy as np
 from neat import StatisticsReporter, DefaultGenome
+from plotly.graph_objs import Scatter, Figure
+from plotly.subplots import make_subplots
 
-from src.paths import Paths
 
-
-def plot_stats(statistics, ylog=False, view=False, filename='avg_fitness.svg'):
+def plot_stats(fig: Figure, statistics: StatisticsReporter, ylog: bool = False) -> Figure:
     """ Plots the population's average and best fitness. """
-    if plt is None:
-        warnings.warn("This display is not available due to a missing optional dependency (matplotlib)")
-        return
 
-    generation = range(len(statistics.most_fit_genomes))
+    generations = list(range(len(statistics.most_fit_genomes)))
     best_fitness = [c.fitness for c in statistics.most_fit_genomes]
     avg_fitness = np.array(statistics.get_fitness_mean())
     stdev_fitness = np.array(statistics.get_fitness_stdev())
 
-    plt.plot(generation, avg_fitness, 'b-', label="average")
-    plt.plot(generation, avg_fitness - stdev_fitness, 'g-.', label="-1 sd")
-    plt.plot(generation, avg_fitness + stdev_fitness, 'g-.', label="+1 sd")
-    plt.plot(generation, best_fitness, 'r-', label="best")
+    sd_minus = avg_fitness - stdev_fitness
+    sd_plus = avg_fitness + stdev_fitness
 
-    plt.title("Population's average and best fitness")
-    plt.xlabel("Generations")
-    plt.ylabel("Fitness")
-    plt.grid()
-    plt.legend(loc="best")
-    if ylog:
-        plt.gca().set_yscale('symlog')
-
-    plt.savefig(filename)
-    if view:
-        plt.show()
-
-    plt.close()
+    fig.add_trace(Scatter(x=generations, y=avg_fitness, mode="lines", line=dict(color="blue"), name="average"), 1, 1)
+    fig.add_trace(Scatter(x=generations, y=sd_minus, mode="lines", line=dict(color="green", dash="dot"), name="-1 sd"),
+                  1, 1)
+    fig.add_trace(Scatter(x=generations, y=sd_plus, mode="lines", line=dict(color="green", dash="dot"), name="+1 sd"),
+                  1, 1)
+    fig.add_trace(Scatter(x=generations, y=best_fitness, mode="lines", line=dict(color="red"), name="best"), 1, 1)
+    fig.update_xaxes(title="Generations", row=1, col=1)
+    y_scale_type = "log" if ylog else "-"
+    fig.update_yaxes(title="Fitness", type=y_scale_type, row=1, col=1)
+    return fig
 
 
-def plot_spikes(spikes, view=False, filename=None, title=None):
-    """ Plots the trains for a single spiking neuron. """
-    t_values = [t for t, I, v, u, f in spikes]
-    v_values = [v for t, I, v, u, f in spikes]
-    u_values = [u for t, I, v, u, f in spikes]
-    I_values = [I for t, I, v, u, f in spikes]
-    f_values = [f for t, I, v, u, f in spikes]
+def plot_species(fig: Figure, statistics: StatisticsReporter) -> Figure:
+    """ Visualizes speciation throughout evolution. """
 
-    fig = plt.figure()
-    plt.subplot(4, 1, 1)
-    plt.ylabel("Potential (mv)")
-    plt.xlabel("Time (in ms)")
-    plt.grid()
-    plt.plot(t_values, v_values, "g-")
+    species_sizes = statistics.get_species_sizes()
+    generations = list(range(len(species_sizes)))
+    curves = np.array(species_sizes).T
 
-    if title is None:
-        plt.title("Izhikevich's spiking neuron model")
-    else:
-        plt.title("Izhikevich's spiking neuron model ({0!s})".format(title))
+    for i, curve in enumerate(curves):
+        fig.add_trace(
+            Scatter(
+                x=generations,
+                y=curve,
+                mode="none",
+                name=f"species_{i}",
+                stackgroup='one',
+                showlegend=False
+            ), 2, 1
+        )
 
-    plt.subplot(4, 1, 2)
-    plt.ylabel("Fired")
-    plt.xlabel("Time (in ms)")
-    plt.grid()
-    plt.plot(t_values, f_values, "r-")
-
-    plt.subplot(4, 1, 3)
-    plt.ylabel("Recovery (u)")
-    plt.xlabel("Time (in ms)")
-    plt.grid()
-    plt.plot(t_values, u_values, "r-")
-
-    plt.subplot(4, 1, 4)
-    plt.ylabel("Current (I)")
-    plt.xlabel("Time (in ms)")
-    plt.grid()
-    plt.plot(t_values, I_values, "r-o")
-
-    if filename is not None:
-        plt.savefig(filename)
-
-    if view:
-        plt.show()
-        plt.close()
-        fig = None
+    fig.update_xaxes(title="Generations", row=2, col=1)
+    fig.update_yaxes(title="Size per Species", row=2, col=1)
 
     return fig
 
 
-def plot_species(statistics, view=False, filename='speciation.svg'):
-    """ Visualizes speciation throughout evolution. """
-    if plt is None:
-        warnings.warn("This display is not available due to a missing optional dependency (matplotlib)")
-        return
-
-    species_sizes = statistics.get_species_sizes()
-    num_generations = len(species_sizes)
-    curves = np.array(species_sizes).T
-
-    fig, ax = plt.subplots()
-    ax.stackplot(range(num_generations), *curves)
-
-    plt.title("Speciation")
-    plt.ylabel("Size per Species")
-    plt.xlabel("Generations")
-
-    plt.savefig(filename)
-
-    if view:
-        plt.show()
-
-    plt.close()
-
-
-def draw_net(config, genome, view=False, filename=None, directory=None, node_names=None, show_disabled=True,
-             prune_unused=False, node_colors=None, fmt='svg'):
+def draw_net(config: neat.Config, genome: DefaultGenome, node_names: dict = None, show_disabled: bool = True,
+             prune_unused: bool = False, node_colors: dict = None, fmt: str = 'svg') -> graphviz.Digraph:
     """ Receives a genome and draws a neural network with arbitrary topology. """
-    # Attributes for network nodes.
-    if graphviz is None:
-        warnings.warn("This display is not available due to a missing optional dependency (graphviz)")
-        return
 
-    if node_names is None:
-        node_names = {}
-
-    assert type(node_names) is dict
-
-    if node_colors is None:
-        node_colors = {}
-
-    assert type(node_colors) is dict
+    node_names = node_names if node_names is not None else {}
+    node_colors = node_colors if node_colors is not None else {}
 
     node_attrs = {
         'shape': 'circle',
         'fontsize': '9',
         'height': '0.2',
-        'width': '0.2'}
+        'width': '0.2'
+    }
 
     dot = graphviz.Digraph(format=fmt, node_attr=node_attrs)
 
@@ -184,14 +114,11 @@ def draw_net(config, genome, view=False, filename=None, directory=None, node_nam
         if n in inputs or n in outputs:
             continue
 
-        attrs = {'style': 'filled',
-                 'fillcolor': node_colors.get(n, 'white')}
+        attrs = {'style': 'filled', 'fillcolor': node_colors.get(n, 'white')}
         dot.node(str(n), _attributes=attrs)
 
     for cg in genome.connections.values():
         if cg.enabled or show_disabled:
-            # if cg.input not in used_nodes or cg.output not in used_nodes:
-            #    continue
             input, output = cg.key
             a = node_names.get(input, str(input))
             b = node_names.get(output, str(output))
@@ -200,31 +127,15 @@ def draw_net(config, genome, view=False, filename=None, directory=None, node_nam
             width = str(0.1 + abs(cg.weight / 5.0))
             dot.edge(a, b, _attributes={'style': style, 'color': color, 'penwidth': width})
 
-    dot.render(filename=filename, directory=directory, view=view)
-
     return dot
 
 
-def generate_plots(checkpoint_prefix: str, config_neat: neat.Config, best_genome: DefaultGenome, node_names: dict,
-                   stats: StatisticsReporter) -> bool:
-    draw_net(
-        config=config_neat,
-        genome=best_genome,
-        view=True,
-        node_names=node_names,
-        directory=os.path.dirname(checkpoint_prefix)
-    )
+def generate_plots(config_neat: neat.Config, best_genome: DefaultGenome, node_names: dict,
+                   stats: StatisticsReporter) -> (graphviz.Digraph, Figure):
+    dot = draw_net(config=config_neat, genome=best_genome, node_names=node_names)
 
-    plot_stats(
-        stats,
-        ylog=False,
-        view=True,
-        filename=os.path.join(os.path.dirname(checkpoint_prefix), "avg_fitness.svg")
-    )
-
-    plot_species(
-        stats,
-        view=True,
-        filename=os.path.join(os.path.dirname(checkpoint_prefix), "speciation.svg")
-    )
-    return True
+    subplot_titles = ["Population's average and best fitness", "Speciation"]
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, subplot_titles=subplot_titles)
+    fig = plot_stats(fig=fig, statistics=stats, ylog=False)
+    fig = plot_species(fig=fig, statistics=stats)
+    return dot, fig

@@ -29,7 +29,7 @@ class Config:
         # neuroevolution settings
         self.screens_per_row: int = 10
         self.step_limit: int = np.inf if self.human_player else 50
-        self.generations: int = 50
+        self.generations: int = 100
         self.eat_apple_score: int = 100
         self.approaching_score: int = 1
         self.retracting_penalty: float = 1.5
