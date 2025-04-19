@@ -8,7 +8,8 @@
 !README.md
 !.pre-commit-config.yaml
 !tox.ini
+!ruff.toml
 
 # Unignored folders
-src/
-tests/
+!src/
+!tests/
