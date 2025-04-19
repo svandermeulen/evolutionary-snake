@@ -1,0 +1,13 @@
+# Ignore all except unignored folders/files
+*
+
+# Unignored files
+!.gitignore
+!poetry.lock
+!pyproject.toml
+!README.md
+
+# Unignored folders
+src/
+tests/
+
