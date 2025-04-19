@@ -6,8 +6,9 @@
 !poetry.lock
 !pyproject.toml
 !README.md
+!.pre-commit-config.yaml
+!tox.ini
 
 # Unignored folders
 src/
 tests/
-
