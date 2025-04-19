@@ -8,6 +8,7 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.12.0"
 dependencies = [
+    "click (>=8.1.8,<9.0.0)"
 ]
 
 [tool.poetry]
@@ -24,3 +25,6 @@ mypy = "^1.15.0"
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+snake = "evolutionary_snake.cli:start"
