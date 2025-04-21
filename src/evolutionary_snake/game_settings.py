@@ -14,7 +14,7 @@ class Settings(pydantic.BaseModel):
     display_width: int = 100 * game_size
     display_height: int = 100 * game_size
     boundary: bool = False
-    frame_rate: float = 1 / 10
+    frame_rate_fps: float = 60
     run_in_background: bool = False
 
     def get_coordinates_grid(self) -> list[tuple[int, int]]:

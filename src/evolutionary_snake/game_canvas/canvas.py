@@ -2,55 +2,82 @@
 
 import pygame
 
-from evolutionary_snake import game_objects
+from evolutionary_snake import game_objects, game_settings
 
 
-def draw(
-    snake: game_objects.Snake,
-    apple: game_objects.Apple | None = None,
-    score: int | None = None,
-    loss: int | None = None,
-) -> pygame.Surface:
-    """Draw the game canvas."""
-    if not pygame.get_init():
-        pygame.init()
+class Canvas:
+    """The game canvas."""
 
-    canvas = pygame.display.set_mode(
-        (snake.width, snake.height + snake.step_size), pygame.HWSURFACE
-    )
-    canvas.fill((255, 255, 255))
+    def __init__(self, settings: game_settings.Settings) -> None:
+        """Initialize the game canvas."""
+        if not pygame.get_init():
+            pygame.init()
+        self.settings = settings
+        self.canvas = pygame.display.set_mode(
+            (settings.display_width, settings.display_height + settings.step_size),
+            pygame.HWSURFACE,
+        )
+        self.canvas.fill((255, 255, 255))
 
-    image_snake = MySurface(
-        width=snake.step_size, height=snake.step_size, rgb=(0, 0, 0)
-    ).create()
-    for i in range(snake.length):
-        canvas.blit(image_snake, (snake.x[i], snake.y[i]))
-
-    if apple is not None:
-        image_apple = MySurface(
-            width=snake.step_size, height=snake.step_size, rgb=(150, 0, 0)
+    def draw_snake(self, snake: game_objects.Snake) -> None:
+        """Draw the snake."""
+        image_snake = MySurface(
+            width=snake.step_size, height=snake.step_size, rgb=(0, 0, 0)
         ).create()
-        canvas.blit(image_apple, (apple.x, apple.y))
+        self.canvas.fill((255, 255, 255))
+        for i in range(snake.length):
+            self.canvas.blit(image_snake, (snake.x[i], snake.y[i]))
 
-    if score is not None:
+    def draw_apple(self, apple: game_objects.Apple) -> None:
+        """Draw the apple."""
+        image_apple = MySurface(
+            width=self.settings.step_size,
+            height=self.settings.step_size,
+            rgb=(150, 0, 0),
+        ).create()
+        self.canvas.blit(image_apple, (apple.x, apple.y))
+
+    def draw_score(self, score: int) -> None:
+        """Draw the score."""
         score_font = MyFont(
-            x=4 * snake.width // 5, y=snake.height - 2, rgb=(0, 0, 0), font_size=8
+            x=4 * self.settings.display_width // 5,
+            y=self.settings.display_height - 2,
+            rgb=(0, 0, 0),
+            font_size=8,
         )
         score_font.draw(
-            surface=canvas,
+            surface=self.canvas,
             my_font=score_font.create(),
             text=f"{str(score).zfill(5)}",
         )
 
-    if loss is not None:
+    def draw_loss(self, loss: int | None) -> None:
+        """Draw the loss if needed."""
         loss_font = MyFont(
-            x=1 * snake.width // 5, y=snake.height - 2, rgb=(0, 0, 0), font_size=8
+            x=1 * self.settings.display_width // 5,
+            y=self.settings.display_height - 2,
+            rgb=(0, 0, 0),
+            font_size=8,
         )
-        loss_font.draw(surface=canvas, my_font=loss_font.create(), text=f"{loss!s}")
+        loss_font.draw(
+            surface=self.canvas, my_font=loss_font.create(), text=f"{loss!s}"
+        )
 
-    pygame.display.flip()
-
-    return canvas
+    def draw(
+        self,
+        snake: game_objects.Snake,
+        apple: game_objects.Apple,
+        score: int = 0,
+        loss: int | None = None,
+    ) -> pygame.Surface:
+        """Draw the canvas and its objects."""
+        self.draw_snake(snake)
+        self.draw_apple(apple)
+        self.draw_score(score)
+        if loss:
+            self.draw_loss(loss)
+        pygame.display.flip()
+        return self.canvas
 
 
 class MySurface:  # pylint: disable=too-few-public-methods

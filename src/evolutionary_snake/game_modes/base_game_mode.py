@@ -26,10 +26,7 @@ class BaseGameMode(abc.ABC):
             settings=settings,
         )
         self.apple = self.generate_apple()
-        self.canvas = canvas.draw(
-            snake=self.snake,
-            apple=self.apple,
-        )
+        self.canvas = canvas.Canvas(settings=settings)
 
     def run(self) -> None:
         """Run the snake game."""
@@ -37,8 +34,8 @@ class BaseGameMode(abc.ABC):
         while self.game_continues():
             self.loop()
             self.render()
-            if self.settings.frame_rate:
-                time.sleep(self.settings.frame_rate)  # waiting time between frames
+            if self.settings.frame_rate_fps:
+                time.sleep(0.1)
         self.cleanup()
 
     def game_continues(self) -> bool:
@@ -78,7 +75,7 @@ class BaseGameMode(abc.ABC):
         """Project game state on a canvas."""
         if self.settings.run_in_background:
             return
-        canvas.draw(
+        self.canvas.draw(
             score=self.score, loss=self.loss, snake=self.snake, apple=self.apple
         )
 
