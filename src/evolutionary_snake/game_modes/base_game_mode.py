@@ -35,7 +35,7 @@ class BaseGameMode(abc.ABC):
             self.loop()
             self.render()
             if self.settings.frame_rate_fps:
-                time.sleep(0.1)
+                time.sleep(0.05)
         self.cleanup()
 
     def game_continues(self) -> bool:

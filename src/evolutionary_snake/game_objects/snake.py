@@ -5,6 +5,12 @@ import random
 from evolutionary_snake import enums, game_settings
 
 DIRECTIONS: list[enums.Direction] = list(enums.Direction)
+DIRECTION_OPPOSITES: dict[enums.Direction, enums.Direction] = {
+    enums.Direction.UP: enums.Direction.DOWN,
+    enums.Direction.DOWN: enums.Direction.UP,
+    enums.Direction.LEFT: enums.Direction.RIGHT,
+    enums.Direction.RIGHT: enums.Direction.LEFT,
+}
 
 
 class Snake:  # pylint: disable=too-many-instance-attributes
@@ -42,6 +48,9 @@ class Snake:  # pylint: disable=too-many-instance-attributes
 
     def update(self, direction: enums.Direction) -> None:
         """Update the body of the snake."""
+        if direction == DIRECTION_OPPOSITES[self.direction]:
+            return
+
         for i in range(self.length - 1, 0, -1):
             self.x[i] = self.x[i - 1]
             self.y[i] = self.y[i - 1]
