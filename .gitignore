@@ -1,5 +1,6 @@
 # Ignore all except unignored folders/files
-*
+/*
+**/__pycache__/
 
 # Unignored files
 !.gitignore
