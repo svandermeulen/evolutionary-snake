@@ -41,6 +41,7 @@ pytest = "^8.3.5"
 branch = true
 parallel = true
 source = ["evolutionary_snake"]
+omit = ["cli.py"]
 
 [tool.coverage.report]
 fail_under = 100

@@ -32,7 +32,7 @@ def main(game_mode: enums.GameMode) -> None:
     """Main entry point to run evolutionary-snake."""
     game_mode_factory = GamaModeDict.get(game_mode)
     if game_mode_factory is None:
-        message = f"Unknown game mode {game_mode.name}"
+        message = f"Unknown game mode {game_mode}"
         raise KeyError(message)
     game = game_mode_factory()
     return game.run()
