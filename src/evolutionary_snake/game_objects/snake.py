@@ -16,16 +16,14 @@ DIRECTION_OPPOSITES: dict[enums.Direction, enums.Direction] = {
 class Snake:  # pylint: disable=too-many-instance-attributes
     """Snake game object."""
 
-    def __init__(
-        self, settings: game_settings.Settings, x_init: int, y_init: int
-    ) -> None:
+    def __init__(self, settings: game_settings.Settings) -> None:
         """Initialize the snake game object."""
         self.length = settings.snake_length_init
         self.width = settings.display_width
         self.height = settings.display_height
         self.step_size = settings.step_size
         self.boundary = settings.boundary
-        self.x, self.y = [x_init], [y_init]
+        self.x, self.y = [self.width // 2], [self.width // 2]
         self.direction: enums.Direction = DIRECTIONS[random.randint(0, 3)]  # noqa: S311  # nosec
         self.initialize_snake()
 

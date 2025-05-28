@@ -20,11 +20,7 @@ class BaseGameMode(abc.ABC):
         self.settings = settings
         self.score = 0
         self.loss = None
-        self.snake = game_objects.Snake(
-            x_init=settings.display_width // 2,
-            y_init=settings.display_height // 2,
-            settings=settings,
-        )
+        self.snake = game_objects.Snake(settings=settings)
         self.apple = self.generate_apple()
         self.canvas = canvas.Canvas(settings=settings)
 

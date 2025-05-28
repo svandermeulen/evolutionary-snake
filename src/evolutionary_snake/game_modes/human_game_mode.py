@@ -16,15 +16,18 @@ class HumanGameMode(base_game_mode.BaseGameMode):
     def get_direction(self) -> enums.Direction:
         """Get the direction of the human game mode."""
         direction = self.snake.direction
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_DOWN]:
-            direction = enums.Direction.DOWN
-        if keys[pygame.K_UP]:
-            direction = enums.Direction.UP
-        if keys[pygame.K_LEFT]:
-            direction = enums.Direction.LEFT
-        if keys[pygame.K_RIGHT]:
-            direction = enums.Direction.RIGHT
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_DOWN:
+                    return enums.Direction.DOWN
+                if event.key == pygame.K_UP:
+                    return enums.Direction.UP
+                if event.key == pygame.K_LEFT:
+                    return enums.Direction.LEFT
+                if event.key == pygame.K_RIGHT:
+                    return enums.Direction.RIGHT
+            return direction
         return direction
 
     def _loop(self) -> None:
