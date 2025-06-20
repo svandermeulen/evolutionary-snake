@@ -29,7 +29,32 @@ def game_mode_fixture(settings: game_settings.Settings) -> game_modes.HumanGameM
     return game_mode
 
 
-def test_human_game_mode_loop(
+def test_human_game_mode_no_movements(
+    game_mode: game_modes.HumanGameMode,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test the human game mode without any movements."""
+    # GIVEN a HumanGameMode instance
+    # AND a series of non-direction keys are pressed
+    events = [
+        pygame.event.Event(pygame.KEYDOWN, key=pygame.K_SPACE),
+        pygame.event.Event(pygame.KEYUP, key=pygame.K_SPACE),
+        pygame.event.Event(pygame.KEYDOWN, key=pygame.K_a),
+    ]
+    events_generator = ([event] for event in events)
+
+    def get_new_event() -> list[pygame.event.Event]:
+        return next(events_generator)
+
+    monkeypatch.setattr("pygame.event.get", get_new_event)
+    # WHEN the game_loop is started
+    direction_initial = game_mode.snake.direction
+    game_mode.loop()
+    # THEN the snake direction should be equal to the initial direction
+    assert game_mode.snake.direction == direction_initial
+
+
+def test_human_game_mode_move_up(
     game_mode: game_modes.HumanGameMode,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -58,6 +83,7 @@ def test_human_game_mode_eats_apple(
         pygame.event.Event(pygame.KEYDOWN, key=pygame.K_LEFT),
         pygame.event.Event(pygame.KEYDOWN, key=pygame.K_DOWN),
         pygame.event.Event(pygame.KEYDOWN, key=pygame.K_LEFT),
+        pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RIGHT),
     ]
     events_generator = ([event] for event in new_events)
 

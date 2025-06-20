@@ -27,7 +27,6 @@ class HumanGameMode(base_game_mode.BaseGameMode):
                     return enums.Direction.LEFT
                 if event.key == pygame.K_RIGHT:
                     return enums.Direction.RIGHT
-            return direction
         return direction
 
     def _loop(self) -> None:
