@@ -51,31 +51,16 @@ class Canvas:
             text=f"{str(score).zfill(5)}",
         )
 
-    def draw_loss(self, loss: int | None) -> None:
-        """Draw the loss if needed."""
-        loss_font = MyFont(
-            x=1 * self.settings.display_width // 5,
-            y=self.settings.display_height - 2,
-            rgb=(0, 0, 0),
-            font_size=8,
-        )
-        loss_font.draw(
-            surface=self.canvas, my_font=loss_font.create(), text=f"{loss!s}"
-        )
-
     def draw(
         self,
         snake: game_objects.Snake,
         apple: game_objects.Apple,
         score: int = 0,
-        loss: int | None = None,
     ) -> pygame.Surface:
         """Draw the canvas and its objects."""
         self.draw_snake(snake)
         self.draw_apple(apple)
         self.draw_score(score)
-        if loss:
-            self.draw_loss(loss)
         pygame.display.flip()
         return self.canvas
 

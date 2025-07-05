@@ -36,7 +36,3 @@ def main(game_mode: enums.GameMode) -> None:
         raise KeyError(message)
     game = game_mode_factory()
     return game.run()
-
-
-if __name__ == "__main__":
-    main(game_mode=enums.GameMode.HUMAN_PLAYER)

@@ -2,7 +2,7 @@
 
 import random
 
-from evolutionary_snake import enums, game_settings
+from evolutionary_snake import enums
 
 DIRECTIONS: list[enums.Direction] = list(enums.Direction)
 DIRECTION_OPPOSITES: dict[enums.Direction, enums.Direction] = {
@@ -16,13 +16,20 @@ DIRECTION_OPPOSITES: dict[enums.Direction, enums.Direction] = {
 class Snake:  # pylint: disable=too-many-instance-attributes
     """Snake game object."""
 
-    def __init__(self, settings: game_settings.Settings) -> None:
+    def __init__(  # pylint: disable=too-many-positional-arguments
+        self,
+        length: int,
+        width: int,
+        height: int,
+        step_size: int,
+        boundary: enums.Boundary,
+    ) -> None:
         """Initialize the snake game object."""
-        self.length = settings.snake_length_init
-        self.width = settings.display_width
-        self.height = settings.display_height
-        self.step_size = settings.step_size
-        self.boundary = settings.boundary
+        self.length = length
+        self.width = width
+        self.height = height
+        self.step_size = step_size
+        self.boundary = boundary
         self.x, self.y = [self.width // 2], [self.width // 2]
         self.direction: enums.Direction = DIRECTIONS[random.randint(0, 3)]  # noqa: S311  # nosec
         self.initialize_snake()
@@ -30,8 +37,8 @@ class Snake:  # pylint: disable=too-many-instance-attributes
     def initialize_snake(self) -> None:
         """Initialize the snake."""
         raster_size = self.width // self.step_size * self.height // self.step_size
-        self.x.extend([-1 * self.step_size for _ in range(1, raster_size)])
-        self.y.extend([self.y[0] for _ in range(1, raster_size)])
+        self.x.extend([-1 * self.step_size] * (raster_size - 1))
+        self.y.extend([self.y[0]] * (raster_size - 1))
 
     def periodic_boundary_conditions(self) -> None:
         """The snake appears at the opposite screen side upon hitting the edge."""
@@ -47,7 +54,7 @@ class Snake:  # pylint: disable=too-many-instance-attributes
     def update(self, direction: enums.Direction) -> None:
         """Update the body of the snake."""
         if direction == DIRECTION_OPPOSITES[self.direction]:
-            return
+            direction = self.direction
 
         for i in range(self.length - 1, 0, -1):
             self.x[i] = self.x[i - 1]
@@ -63,7 +70,7 @@ class Snake:  # pylint: disable=too-many-instance-attributes
         if direction == enums.Direction.DOWN:
             self.y[0] = self.y[0] + self.step_size
 
-        if not self.boundary:
+        if self.boundary == enums.Boundary.PERIODIC_BOUNDARY:
             self.periodic_boundary_conditions()
 
         self.direction = direction

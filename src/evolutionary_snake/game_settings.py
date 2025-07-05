@@ -4,6 +4,8 @@ import itertools
 
 import pydantic
 
+from evolutionary_snake import enums
+
 
 class Settings(pydantic.BaseModel):
     """Settings of the evolutionary snake game."""
@@ -13,8 +15,8 @@ class Settings(pydantic.BaseModel):
     snake_length_init: int = 3
     display_width: int = 100 * game_size
     display_height: int = 100 * game_size
-    boundary: bool = False
-    frame_rate_fps: float = 60
+    boundary: enums.Boundary = enums.Boundary.HARD_BOUNDARY
+    frame_rate_fps: float = 20
     run_in_background: bool = False
 
     def get_coordinates_grid(self) -> list[tuple[int, int]]:

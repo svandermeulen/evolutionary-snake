@@ -18,3 +18,10 @@ class GameMode(enum.StrEnum):
     HUMAN_PLAYER = "human_player"
     TRAINING = "training"
     AI_PLAYER = "ai_player"
+
+
+class Boundary(enum.StrEnum):
+    """Enum to define the boundaries of the game."""
+
+    HARD_BOUNDARY = "hard_boundary"
+    PERIODIC_BOUNDARY = "periodic_boundary"

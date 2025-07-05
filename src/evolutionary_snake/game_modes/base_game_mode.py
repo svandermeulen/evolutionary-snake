@@ -20,8 +20,13 @@ class BaseGameMode(abc.ABC):
         self.settings = settings
         self.running = True
         self.score = 0
-        self.loss = None
-        self.snake = game_objects.Snake(settings=settings)
+        self.snake = game_objects.Snake(
+            length=settings.snake_length_init,
+            width=settings.display_width,
+            height=settings.display_height,
+            step_size=settings.step_size,
+            boundary=settings.boundary,
+        )
         self.apple = self.generate_apple()
         self.canvas = (
             canvas.Canvas(settings=settings) if not settings.run_in_background else None
@@ -36,8 +41,7 @@ class BaseGameMode(abc.ABC):
                 break
             self.loop()
             self.render()
-            if self.settings.frame_rate_fps:
-                time.sleep(0.05)
+            time.sleep(1 / self.settings.frame_rate_fps)
         self.cleanup()
 
     def game_continues(self) -> bool:
@@ -75,13 +79,8 @@ class BaseGameMode(abc.ABC):
 
     def render(self) -> None:
         """Project game state on a canvas."""
-        if self.settings.run_in_background:
-            return
-        if not self.canvas:
-            return
-        self.canvas.draw(
-            score=self.score, loss=self.loss, snake=self.snake, apple=self.apple
-        )
+        if not self.settings.run_in_background and self.canvas:
+            self.canvas.draw(score=self.score, snake=self.snake, apple=self.apple)
 
     def collided(self) -> bool:
         """Return True if the snake collided with anything."""
@@ -89,12 +88,15 @@ class BaseGameMode(abc.ABC):
 
     def collided_with_boundary(self) -> bool:
         """Return True if the snake collides with the boundary."""
-        if not self.settings.boundary:
+        if self.settings.boundary == enums.Boundary.PERIODIC_BOUNDARY:
             return False
-        return (
-            self.snake.x[0],
-            self.snake.y[0],
-        ) in self.settings.get_coordinates_boundary()
+        if self.settings.boundary == enums.Boundary.HARD_BOUNDARY:
+            return (
+                self.snake.x[0],
+                self.snake.y[0],
+            ) in self.settings.get_coordinates_boundary()
+        msg = f"Unexpected boundary type: {self.settings.boundary}"
+        raise NotImplementedError(msg)
 
     def collided_with_itself(self) -> bool:
         """Return True if the snake collides with itself."""

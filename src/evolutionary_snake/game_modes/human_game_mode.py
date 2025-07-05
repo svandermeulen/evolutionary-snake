@@ -1,9 +1,14 @@
 """Module for defining the human game mode."""
 
+import logging
+
 import pygame
 
 from evolutionary_snake import enums
 from evolutionary_snake.game_modes import base_game_mode
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 
 class HumanGameMode(base_game_mode.BaseGameMode):
@@ -36,4 +41,5 @@ class HumanGameMode(base_game_mode.BaseGameMode):
 
     def process_score(self) -> None:
         """Process the score upon cleaning up."""
-        return
+        msg = f"Your final score is: {self.score}"
+        logger.info(msg)
