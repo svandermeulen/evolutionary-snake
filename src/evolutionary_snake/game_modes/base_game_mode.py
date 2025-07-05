@@ -18,16 +18,22 @@ class BaseGameMode(abc.ABC):
     def __init__(self, settings: game_settings.Settings) -> None:
         """Initialize the base game mode."""
         self.settings = settings
+        self.running = True
         self.score = 0
         self.loss = None
         self.snake = game_objects.Snake(settings=settings)
         self.apple = self.generate_apple()
-        self.canvas = canvas.Canvas(settings=settings)
+        self.canvas = (
+            canvas.Canvas(settings=settings) if not settings.run_in_background else None
+        )
 
     def run(self) -> None:
         """Run the snake game."""
         pygame.init()
-        while self.game_continues():
+        while self.running:
+            if not self.game_continues():
+                self.running = False
+                break
             self.loop()
             self.render()
             if self.settings.frame_rate_fps:
@@ -71,6 +77,8 @@ class BaseGameMode(abc.ABC):
         """Project game state on a canvas."""
         if self.settings.run_in_background:
             return
+        if not self.canvas:
+            return
         self.canvas.draw(
             score=self.score, loss=self.loss, snake=self.snake, apple=self.apple
         )
@@ -108,10 +116,7 @@ class BaseGameMode(abc.ABC):
     @staticmethod
     def game_ending_key_press() -> bool:
         """Keys to end the game."""
-        return pygame.key.get_pressed()[pygame.K_ESCAPE] or (
-            pygame.key.get_pressed()[pygame.K_c]
-            and pygame.key.get_pressed()[pygame.K_LCTRL]
-        )
+        return pygame.key.get_pressed()[pygame.K_ESCAPE]
 
     @abc.abstractmethod
     def game_ending_conditions_other(self) -> bool:
