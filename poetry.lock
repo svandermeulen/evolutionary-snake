@@ -369,6 +369,18 @@ files = [
 ]
 
 [[package]]
+name = "neat-python"
+version = "0.92"
+description = "A NEAT (NeuroEvolution of Augmenting Topologies) implementation"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "neat-python-0.92.tar.gz", hash = "sha256:be722a62d053b39fe960228e3e0baffdebe73074133ce40bbd35de650ca53a0f"},
+    {file = "neat_python-0.92-py3-none-any.whl", hash = "sha256:c69f3748032cc9653b902f0cca05983b79f5288c67aed747aa47279161117059"},
+]
+
+[[package]]
 name = "numpy"
 version = "2.2.4"
 description = "Fundamental package for array computing in Python"
@@ -1051,4 +1063,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12.0"
-content-hash = "8958a392b1be9c396da23c335345597a0ecdaa6927d4f96c5502df6c8e5d8842"
+content-hash = "64abde047497cace6263d7bda95883a028daaeb8c4f2c20cbda0264f79c5f1a0"

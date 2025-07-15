@@ -19,13 +19,15 @@ class Settings(pydantic.BaseModel):
     frame_rate_fps: float = 20
     run_in_background: bool = False
 
-    def get_coordinates_grid(self) -> list[tuple[int, int]]:
+    @property
+    def coordinates_grid(self) -> list[tuple[int, int]]:
         """Returns the coordinates of the snake game grid."""
         x_list = list(range(0, self.display_width + self.step_size, self.step_size))
         y_list = list(range(0, self.display_height + self.step_size, self.step_size))
         return list(itertools.product(x_list, y_list))
 
-    def get_coordinates_boundary(self) -> list[tuple[int, int]]:
+    @property
+    def coordinates_boundary(self) -> list[tuple[int, int]]:
         """Returns the coordinates of the snake game boundary."""
         y_list = list(range(0, self.display_height + self.step_size, self.step_size))
         coordinates_boundary = [(-self.step_size, c) for c in y_list]
@@ -33,3 +35,27 @@ class Settings(pydantic.BaseModel):
         coordinates_boundary.extend([(c, -self.step_size) for c in y_list])
         coordinates_boundary.extend([(c, self.display_height) for c in y_list])
         return coordinates_boundary
+
+
+class AiGameSettings(Settings):
+    """Settings of the AI game mode."""
+
+    step_limit: int = 50
+    approaching_score: int = 1
+    retracting_penalty: float = 1.5
+    eat_apple_score: int = 100
+    collision_penalty: int = 1000
+    node_names: dict[int, str] = {
+        -1: "Apple_left",
+        -2: "Apple_right",
+        -3: "Apple_up",
+        -4: "Apple_down",
+        -5: "Right_clear",
+        -6: "Left_clear",
+        -7: "Bottom_clear",
+        -8: "Up_clear",
+        0: "RIGHT",
+        1: "LEFT",
+        2: "UP",
+        3: "DOWN",
+    }

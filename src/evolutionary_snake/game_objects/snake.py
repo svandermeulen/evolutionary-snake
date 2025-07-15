@@ -40,6 +40,17 @@ class Snake:  # pylint: disable=too-many-instance-attributes
         self.x.extend([-1 * self.step_size] * (raster_size - 1))
         self.y.extend([self.y[0]] * (raster_size - 1))
 
+    @property
+    def coordinates(self) -> list[tuple[int, int]]:
+        """Return list of snake coordinates."""
+        return list(
+            zip(
+                self.x[: self.length],
+                self.y[: self.length],
+                strict=False,
+            )
+        )
+
     def periodic_boundary_conditions(self) -> None:
         """The snake appears at the opposite screen side upon hitting the edge."""
         if self.x[0] > self.width - self.step_size:

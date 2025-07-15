@@ -24,7 +24,10 @@ class GameModeFactory:  # pylint: disable=too-few-public-methods
 GamaModeDict: dict[enums.GameMode, GameModeFactory] = {
     enums.GameMode.HUMAN_PLAYER: GameModeFactory(
         settings=game_settings.Settings, game_mode=game_modes.HumanGameMode
-    )
+    ),
+    enums.GameMode.AI_PLAYER: GameModeFactory(
+        settings=game_settings.AiGameSettings, game_mode=game_modes.AiGameMode
+    ),
 }
 
 

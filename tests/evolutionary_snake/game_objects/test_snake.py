@@ -5,18 +5,6 @@ import pytest
 from evolutionary_snake import enums, game_objects
 
 
-@pytest.fixture(name="snake")
-def snake_fixture() -> game_objects.Snake:
-    """Fixture to create a snake object."""
-    return game_objects.Snake(
-        length=3,
-        width=300,
-        height=300,
-        step_size=15,
-        boundary=enums.Boundary.PERIODIC_BOUNDARY,
-    )
-
-
 def test_snake(snake: game_objects.Snake) -> None:
     """Test the snake object."""
     # GIVEN common snake settings

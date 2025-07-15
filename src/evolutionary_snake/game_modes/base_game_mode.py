@@ -62,10 +62,7 @@ class BaseGameMode(abc.ABC):
     def generate_apple(self) -> game_objects.Apple:
         """Generate an apple for the game mode."""
         return game_objects.Apple(
-            snake_coordinates=[
-                self.snake.x[0 : self.snake.length],
-                self.snake.y[0 : self.snake.length],
-            ],
+            snake_coordinates=self.snake.coordinates,
             settings=self.settings,
         )
 
@@ -94,7 +91,7 @@ class BaseGameMode(abc.ABC):
             return (
                 self.snake.x[0],
                 self.snake.y[0],
-            ) in self.settings.get_coordinates_boundary()
+            ) in self.settings.coordinates_boundary
         msg = f"Unexpected boundary type: {self.settings.boundary}"
         raise NotImplementedError(msg)
 
