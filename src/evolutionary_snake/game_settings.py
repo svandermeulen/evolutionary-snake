@@ -15,7 +15,7 @@ class Settings(pydantic.BaseModel):
     snake_length_init: int = 3
     display_width: int = 100 * game_size
     display_height: int = 100 * game_size
-    boundary: enums.Boundary = enums.Boundary.HARD_BOUNDARY
+    boundary_type: enums.BoundaryType = enums.BoundaryType.HARD_BOUNDARY
     frame_rate_fps: float = 20
     run_in_background: bool = False
 
@@ -25,16 +25,6 @@ class Settings(pydantic.BaseModel):
         x_list = list(range(0, self.display_width + self.step_size, self.step_size))
         y_list = list(range(0, self.display_height + self.step_size, self.step_size))
         return list(itertools.product(x_list, y_list))
-
-    @property
-    def coordinates_boundary(self) -> list[tuple[int, int]]:
-        """Returns the coordinates of the snake game boundary."""
-        y_list = list(range(0, self.display_height + self.step_size, self.step_size))
-        coordinates_boundary = [(-self.step_size, c) for c in y_list]
-        coordinates_boundary.extend([(self.display_width, c) for c in y_list])
-        coordinates_boundary.extend([(c, -self.step_size) for c in y_list])
-        coordinates_boundary.extend([(c, self.display_height) for c in y_list])
-        return coordinates_boundary
 
 
 class AiGameSettings(Settings):

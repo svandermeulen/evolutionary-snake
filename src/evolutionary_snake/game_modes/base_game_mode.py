@@ -8,6 +8,7 @@ import pygame
 
 from evolutionary_snake import enums, game_objects, game_settings
 from evolutionary_snake.game_canvas import canvas
+from evolutionary_snake.game_objects.boundaries import boundary_factory
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 
@@ -18,6 +19,7 @@ class BaseGameMode(abc.ABC):
     def __init__(self, settings: game_settings.Settings) -> None:
         """Initialize the base game mode."""
         self.settings = settings
+        self.boundary = boundary_factory.boundary_factory(self.settings)
         self.running = True
         self.score = 0
         self.snake = game_objects.Snake(
@@ -25,7 +27,7 @@ class BaseGameMode(abc.ABC):
             width=settings.display_width,
             height=settings.display_height,
             step_size=settings.step_size,
-            boundary=settings.boundary,
+            boundary=self.boundary,
         )
         self.apple = self.generate_apple()
         self.canvas = (
@@ -57,13 +59,14 @@ class BaseGameMode(abc.ABC):
         pygame.event.pump()
         direction = self.get_direction()
         self.snake.update(direction=direction)
-        self._loop()
+        self._loop(direction=direction)
 
     def generate_apple(self) -> game_objects.Apple:
         """Generate an apple for the game mode."""
         return game_objects.Apple(
             snake_coordinates=self.snake.coordinates,
             settings=self.settings,
+            boundary=self.boundary,
         )
 
     @abc.abstractmethod
@@ -71,7 +74,7 @@ class BaseGameMode(abc.ABC):
         """Return the direction the snake should go."""
 
     @abc.abstractmethod
-    def _loop(self) -> None:
+    def _loop(self, direction: enums.Direction) -> None:
         """Extend the actions that should be taken in the loop."""
 
     def render(self) -> None:
@@ -81,26 +84,7 @@ class BaseGameMode(abc.ABC):
 
     def collided(self) -> bool:
         """Return True if the snake collided with anything."""
-        return self.collided_with_itself() or self.collided_with_boundary()
-
-    def collided_with_boundary(self) -> bool:
-        """Return True if the snake collides with the boundary."""
-        if self.settings.boundary == enums.Boundary.PERIODIC_BOUNDARY:
-            return False
-        if self.settings.boundary == enums.Boundary.HARD_BOUNDARY:
-            return (
-                self.snake.x[0],
-                self.snake.y[0],
-            ) in self.settings.coordinates_boundary
-        msg = f"Unexpected boundary type: {self.settings.boundary}"
-        raise NotImplementedError(msg)
-
-    def collided_with_itself(self) -> bool:
-        """Return True if the snake collides with itself."""
-        return any(
-            self.snake.x[0] == x and self.snake.y[0] == y
-            for x, y in zip(self.snake.x[1:], self.snake.y[1:], strict=False)
-        )
+        return self.snake.collided_with_itself() or self.snake.collided_with_boundary()
 
     def eaten_apple(self) -> bool:
         """Return True if the snake eaten the apple."""

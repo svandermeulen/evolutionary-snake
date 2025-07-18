@@ -18,3 +18,18 @@ def test_canvas_init(settings: game_settings.Settings) -> None:
     assert pygame.get_init()
     # AND the canvas attribute should not be equal to None
     assert canvas.canvas is not None
+
+
+def test_canvas_with_pygame_init(settings: game_settings.Settings) -> None:
+    """Test that the canvas object is initialized when pygame is initialized."""
+    # GIVEN common settings
+    # AND that pygame is initialized
+    pygame.init()
+    # WHEN a canvas object is instantiated
+    canvas = game_canvas.Canvas(
+        settings=settings,
+    )
+    # THEN pygame should have been initialized
+    assert pygame.get_init()
+    # AND the canvas attribute should not be equal to None
+    assert canvas.canvas is not None

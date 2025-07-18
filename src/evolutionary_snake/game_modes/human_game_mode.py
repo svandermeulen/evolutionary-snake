@@ -34,8 +34,9 @@ class HumanGameMode(base_game_mode.BaseGameMode):
                     return enums.Direction.RIGHT
         return direction
 
-    def _loop(self) -> None:
+    def _loop(self, direction: enums.Direction) -> None:
         """Extend the loop function."""
+        del direction
         if self.eaten_apple():
             self.update_eating_apple()
 

@@ -20,7 +20,7 @@ class GameMode(enum.StrEnum):
     AI_PLAYER = "ai_player"
 
 
-class Boundary(enum.StrEnum):
+class BoundaryType(enum.StrEnum):
     """Enum to define the boundaries of the game."""
 
     HARD_BOUNDARY = "hard_boundary"
