@@ -9,8 +9,12 @@ from evolutionary_snake.utils import enums
 
 
 @click.command()
-@click.option("--game-mode", default=enums.GameMode.AI_PLAYER)
-@click.option("--path_checkpoint", default=None, type=click.Path(exists=True))
+@click.option(
+    "--game-mode",
+    default=enums.GameMode.AI_PLAYER,
+    type=click.Choice(enums.GameMode, case_sensitive=False),
+)
+@click.option("--path-checkpoint", default=None, type=click.Path(exists=True))
 def start(game_mode: enums.GameMode, path_checkpoint: pathlib.Path | None) -> None:
     """Start the evolutionary_snake game_modes."""
     if game_mode == enums.GameMode.AI_PLAYER and not path_checkpoint:
@@ -20,7 +24,11 @@ def start(game_mode: enums.GameMode, path_checkpoint: pathlib.Path | None) -> No
 
 
 @click.command()
-@click.option("--training-mode", default=enums.TrainingMode.SEQUENTIAL)
+@click.option(
+    "--training-mode",
+    default=enums.TrainingMode.SEQUENTIAL,
+    type=click.Choice(enums.TrainingMode, case_sensitive=False),
+)
 def start_training(training_mode: enums.TrainingMode) -> None:
     """Start the evolutionary_snake training mode."""
     return snake_training.run_snake_training(training_mode=training_mode)

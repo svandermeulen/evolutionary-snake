@@ -16,7 +16,6 @@ class GameMode(enum.StrEnum):
     """Enum to define game_modes modes."""
 
     HUMAN_PLAYER = "human_player"
-    TRAINING = "training"
     AI_PLAYER = "ai_player"
 
 

@@ -19,7 +19,7 @@ class TrainingSettings(pydantic.BaseModel):
 
     generations: int = 5
     checkpoint_prefix: pathlib.Path = pydantic.Field(
-        default=pathlib.Path(__file__).parents[1]
+        default=pathlib.Path(__file__).parents[3]
         / "data"
         / DATE
         / TIME
@@ -27,7 +27,7 @@ class TrainingSettings(pydantic.BaseModel):
         validate_default=True,
     )
     path_neat_config: pathlib.Path = (
-        pathlib.Path(__file__).parents[2] / "data" / "neat_config"
+        pathlib.Path(__file__).parents[3] / "data" / "neat_config"
     )
 
     @pydantic.field_validator("checkpoint_prefix")

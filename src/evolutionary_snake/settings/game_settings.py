@@ -35,7 +35,7 @@ class AiGameSettings(GameSettings):
     model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
     name: str = "AI Snake"
     path_neat_config: pathlib.Path = (
-        pathlib.Path(__file__).parents[1] / "data" / "neat_config"
+        pathlib.Path(__file__).parents[3] / "data" / "neat_config"
     )
     neural_net: neat.nn.FeedForwardNetwork
     step_limit: int = 50
