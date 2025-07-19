@@ -2,7 +2,7 @@
 
 import pydantic
 
-from evolutionary_snake import enums
+from evolutionary_snake.utils import enums
 
 
 class LossTracker(pydantic.BaseModel):

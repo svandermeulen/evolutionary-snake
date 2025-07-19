@@ -4,8 +4,8 @@ import logging
 
 import pygame
 
-from evolutionary_snake import enums
 from evolutionary_snake.game_modes import base_game_mode
+from evolutionary_snake.utils import enums
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)

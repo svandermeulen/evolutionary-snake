@@ -25,3 +25,10 @@ class BoundaryType(enum.StrEnum):
 
     HARD_BOUNDARY = "hard_boundary"
     PERIODIC_BOUNDARY = "periodic_boundary"
+
+
+class TrainingMode(enum.StrEnum):
+    """Enum to define the training modes."""
+
+    SEQUENTIAL = "sequential"
+    PARALLEL = "parallel"

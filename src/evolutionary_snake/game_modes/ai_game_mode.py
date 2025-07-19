@@ -4,11 +4,11 @@ import logging
 import math
 
 import numpy as np
-from neat import nn
 
-from evolutionary_snake import enums, game_settings
+from evolutionary_snake import settings
 from evolutionary_snake.game_modes import base_game_mode
 from evolutionary_snake.machine_learning import input_vector, loss_tracking
+from evolutionary_snake.utils import enums
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -19,15 +19,13 @@ class AiGameMode(base_game_mode.BaseGameMode):
 
     def __init__(
         self,
-        settings: game_settings.AiGameSettings,
-        name: str,
-        neural_net: nn.FeedForwardNetwork,
+        game_settings: settings.AiGameSettings,
     ) -> None:
         """Initialize the AI game mode."""
-        super().__init__(settings=settings)
-        self.settings: game_settings.AiGameSettings = settings
-        self.name = name
-        self.neural_net = neural_net
+        super().__init__(game_settings=game_settings)
+        self.game_settings: settings.AiGameSettings = game_settings
+        self.name = game_settings.name
+        self.neural_net = game_settings.neural_net
         self.steps_without_apple = 0
         self.apple_distance = self.distance_to_apple()
         self.input_vector = input_vector.compute_input_vector(
@@ -38,7 +36,7 @@ class AiGameMode(base_game_mode.BaseGameMode):
     def process_score(self) -> None:
         """Process the score upon cleaning up."""
         if self.collided():
-            self.loss_tracker.loss -= self.settings.collision_penalty
+            self.loss_tracker.loss -= self.game_settings.collision_penalty
         self.loss_tracker.loss += self.loss_tracker.steps_total
         exploration_minimum = min(self.loss_tracker.direction_counts.values())
         if exploration_minimum > 0:
@@ -59,7 +57,7 @@ class AiGameMode(base_game_mode.BaseGameMode):
 
     def game_ending_conditions_other(self) -> bool:
         """Extend the game ending conditions."""
-        if self.steps_without_apple >= self.settings.step_limit >= 0:
+        if self.steps_without_apple >= self.game_settings.step_limit >= 0:
             msg = f"{self.name} played too long without eating apple"
             logger.info(msg)
             return True
@@ -71,14 +69,14 @@ class AiGameMode(base_game_mode.BaseGameMode):
         # is the snake approaching or retracting from the apple?
         apple_distance_current = self.distance_to_apple()
         if apple_distance_current <= self.apple_distance:
-            self.loss_tracker.loss += self.settings.approaching_score
+            self.loss_tracker.loss += self.game_settings.approaching_score
         else:
-            self.loss_tracker.loss -= self.settings.retracting_penalty
+            self.loss_tracker.loss -= self.game_settings.retracting_penalty
         self.apple_distance = apple_distance_current
 
         if self.eaten_apple():
             self.update_eating_apple()
-            self.loss_tracker.loss += self.settings.eat_apple_score
+            self.loss_tracker.loss += self.game_settings.eat_apple_score
             self.steps_without_apple = 0
         else:
             self.steps_without_apple += 1

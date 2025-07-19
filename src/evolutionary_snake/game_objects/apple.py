@@ -2,9 +2,9 @@
 
 import random
 
-from evolutionary_snake import game_settings
 from evolutionary_snake.game_objects import boundaries
 from evolutionary_snake.game_objects.boundaries import base_boundary
+from evolutionary_snake.settings import game_settings
 
 
 class Apple:  # pylint: disable=too-few-public-methods
@@ -13,7 +13,7 @@ class Apple:  # pylint: disable=too-few-public-methods
     def __init__(
         self,
         snake_coordinates: list[tuple[int, int]],
-        settings: game_settings.Settings,
+        settings: game_settings.GameSettings,
         boundary: base_boundary.BaseBoundary,
         seed: int | None = None,
     ) -> None:

@@ -6,9 +6,10 @@ import time
 
 import pygame
 
-from evolutionary_snake import enums, game_objects, game_settings
+from evolutionary_snake import game_objects, settings
 from evolutionary_snake.game_canvas import canvas
 from evolutionary_snake.game_objects.boundaries import boundary_factory
+from evolutionary_snake.utils import enums
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 
@@ -16,22 +17,24 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 class BaseGameMode(abc.ABC):
     """Base game mode."""
 
-    def __init__(self, settings: game_settings.Settings) -> None:
+    def __init__(self, game_settings: settings.GameSettings) -> None:
         """Initialize the base game mode."""
-        self.settings = settings
-        self.boundary = boundary_factory.boundary_factory(self.settings)
+        self.game_settings = game_settings
+        self.boundary = boundary_factory.boundary_factory(self.game_settings)
         self.running = True
         self.score = 0
         self.snake = game_objects.Snake(
-            length=settings.snake_length_init,
-            width=settings.display_width,
-            height=settings.display_height,
-            step_size=settings.step_size,
+            length=game_settings.snake_length_init,
+            width=game_settings.display_width,
+            height=game_settings.display_height,
+            step_size=game_settings.step_size,
             boundary=self.boundary,
         )
         self.apple = self.generate_apple()
         self.canvas = (
-            canvas.Canvas(settings=settings) if not settings.run_in_background else None
+            canvas.Canvas(settings=game_settings)
+            if not game_settings.run_in_background
+            else None
         )
 
     def run(self) -> None:
@@ -43,7 +46,7 @@ class BaseGameMode(abc.ABC):
                 break
             self.loop()
             self.render()
-            time.sleep(1 / self.settings.frame_rate_fps)
+            time.sleep(1 / self.game_settings.frame_rate_fps)
         self.cleanup()
 
     def game_continues(self) -> bool:
@@ -65,7 +68,7 @@ class BaseGameMode(abc.ABC):
         """Generate an apple for the game mode."""
         return game_objects.Apple(
             snake_coordinates=self.snake.coordinates,
-            settings=self.settings,
+            settings=self.game_settings,
             boundary=self.boundary,
         )
 
@@ -79,7 +82,7 @@ class BaseGameMode(abc.ABC):
 
     def render(self) -> None:
         """Project game state on a canvas."""
-        if not self.settings.run_in_background and self.canvas:
+        if not self.game_settings.run_in_background and self.canvas:
             self.canvas.draw(score=self.score, snake=self.snake, apple=self.apple)
 
     def collided(self) -> bool:

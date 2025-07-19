@@ -1,8 +1,9 @@
 """Module to build a boundary factory."""
 
-from evolutionary_snake import enums, game_settings
 from evolutionary_snake.game_objects import boundaries
 from evolutionary_snake.game_objects.boundaries import base_boundary
+from evolutionary_snake.settings import game_settings
+from evolutionary_snake.utils import enums
 
 BoundaryDict: dict[enums.BoundaryType, type[base_boundary.BaseBoundary]] = {
     enums.BoundaryType.HARD_BOUNDARY: boundaries.HardBoundary,
@@ -10,7 +11,9 @@ BoundaryDict: dict[enums.BoundaryType, type[base_boundary.BaseBoundary]] = {
 }
 
 
-def boundary_factory(settings: game_settings.Settings) -> base_boundary.BaseBoundary:
+def boundary_factory(
+    settings: game_settings.GameSettings,
+) -> base_boundary.BaseBoundary:
     """Factory method for creating a boundary object."""
     boundary = BoundaryDict.get(settings.boundary_type)
     if boundary is None:

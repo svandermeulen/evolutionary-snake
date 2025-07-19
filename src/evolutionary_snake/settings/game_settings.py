@@ -1,13 +1,15 @@
 """Config of the evolutionary snake game."""
 
 import itertools
+import pathlib
 
+import neat
 import pydantic
 
-from evolutionary_snake import enums
+from evolutionary_snake.utils import enums
 
 
-class Settings(pydantic.BaseModel):
+class GameSettings(pydantic.BaseModel):
     """Settings of the evolutionary snake game."""
 
     game_size: int = 3
@@ -27,9 +29,15 @@ class Settings(pydantic.BaseModel):
         return list(itertools.product(x_list, y_list))
 
 
-class AiGameSettings(Settings):
+class AiGameSettings(GameSettings):
     """Settings of the AI game mode."""
 
+    model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
+    name: str = "AI Snake"
+    path_neat_config: pathlib.Path = (
+        pathlib.Path(__file__).parents[1] / "data" / "neat_config"
+    )
+    neural_net: neat.nn.FeedForwardNetwork
     step_limit: int = 50
     approaching_score: int = 1
     retracting_penalty: float = 1.5

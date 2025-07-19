@@ -2,9 +2,9 @@
 
 import random
 
-from evolutionary_snake import enums
 from evolutionary_snake.game_objects import boundaries
 from evolutionary_snake.game_objects.boundaries import base_boundary
+from evolutionary_snake.utils import enums
 
 DIRECTIONS: list[enums.Direction] = list(enums.Direction)
 DIRECTION_OPPOSITES: dict[enums.Direction, enums.Direction] = {

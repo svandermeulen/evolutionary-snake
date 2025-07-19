@@ -1,7 +1,7 @@
 """Test module with tests for the loss tracking module."""
 
-from evolutionary_snake import enums
 from evolutionary_snake.machine_learning import loss_tracking
+from evolutionary_snake.utils import enums
 
 
 def test_loss_tracker() -> None:

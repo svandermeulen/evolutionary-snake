@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 import pygame
 
-from evolutionary_snake import enums
+from evolutionary_snake.utils import enums
 
 
 def get_event_generator(

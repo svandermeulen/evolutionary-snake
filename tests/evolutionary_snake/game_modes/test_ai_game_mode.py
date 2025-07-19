@@ -2,51 +2,28 @@
 
 import pathlib
 
-import neat
 import pygame
 import pytest
 
-from evolutionary_snake import enums, game_modes, game_objects, game_settings
+from evolutionary_snake import game_modes, game_objects
+from evolutionary_snake.settings import game_settings
+from evolutionary_snake.utils import enums
 from tests.evolutionary_snake.helper_methods import helper_functions
 
 
 @pytest.fixture(name="path_neat_config")
 def path_neat_config_fixture() -> pathlib.Path:
     """Path to a test neat config file."""
-    return pathlib.Path(__file__).parents[2] / "data" / "test_neat_config"
-
-
-@pytest.fixture(name="neat_config")
-def neat_config_fixture(path_neat_config: pathlib.Path) -> neat.Config:
-    """Fixture to return a neat config instance."""
-    return neat.Config(
-        genome_type=neat.DefaultGenome,
-        reproduction_type=neat.DefaultReproduction,
-        species_set_type=neat.DefaultSpeciesSet,
-        stagnation_type=neat.DefaultStagnation,
-        filename=path_neat_config,
-    )
-
-
-@pytest.fixture(name="neural_net")
-def neural_net_fixture(neat_config: neat.Config) -> neat.nn.FeedForwardNetwork:
-    """Fixture to return an AI neural network instance."""
-    return neat.nn.FeedForwardNetwork.create(
-        neat.DefaultGenome(key=1),
-        config=neat_config,
-    )
+    return pathlib.Path(__file__).parents[2] / "data" / "neat_config"
 
 
 @pytest.fixture(name="game_mode")
 def game_mode_fixture(
     ai_settings: game_settings.AiGameSettings,
-    neural_net: neat.nn.FeedForwardNetwork,
 ) -> game_modes.AiGameMode:
     """Fixture to return a AI game mode instance."""
     game_mode = game_modes.AiGameMode(
-        settings=ai_settings,
-        name="Test Snake",
-        neural_net=neural_net,
+        game_settings=ai_settings,
     )
     game_mode.snake.direction = enums.Direction.RIGHT
     game_mode.apple.x = (ai_settings.display_width // 2) - 2 * ai_settings.step_size
@@ -60,7 +37,7 @@ def test_ai_game_mode_snake_runs_into_hard_boundary(
 ) -> None:
     """Test the AI game mode until snake hits the hard boundary."""
     # GIVEN an AI game_mode with a hard boundary game setting
-    game_mode.settings.boundary_type = enums.BoundaryType.HARD_BOUNDARY
+    game_mode.game_settings.boundary_type = enums.BoundaryType.HARD_BOUNDARY
     # WHEN the game is run
     game_mode.run()
     # THEN after the run has finished the running attribute is equal to False.
@@ -98,7 +75,7 @@ def test_ai_game_mode_snake_eats_apple(
     monkeypatch.setattr(game_mode, "generate_apple", _generate_apple)
 
     # AND the game is ended by running around too long without eating an apple
-    game_mode.settings.step_limit = 2
+    game_mode.game_settings.step_limit = 2
     # WHEN the game is run
     game_mode.run()
     # THEN after the run has finished the running attribute is equal to False.

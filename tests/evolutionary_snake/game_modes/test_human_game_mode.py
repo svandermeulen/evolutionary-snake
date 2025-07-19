@@ -3,17 +3,20 @@
 import pygame
 import pytest
 
-from evolutionary_snake import enums, game_modes, game_settings
+from evolutionary_snake import game_modes, settings
+from evolutionary_snake.utils import enums
 from tests.evolutionary_snake.helper_methods import helper_functions
 
 
 @pytest.fixture(name="game_mode")
-def game_mode_fixture(settings: game_settings.Settings) -> game_modes.HumanGameMode:
+def game_mode_fixture(game_settings: settings.GameSettings) -> game_modes.HumanGameMode:
     """Fixture to return a human game mode instance."""
-    game_mode = game_modes.HumanGameMode(settings=settings)
+    game_mode = game_modes.HumanGameMode(game_settings=game_settings)
     game_mode.snake.direction = enums.Direction.RIGHT
-    game_mode.apple.x = (settings.display_width // 2) - 2 * settings.step_size
-    game_mode.apple.y = (settings.display_height // 2) + 2 * settings.step_size
+    game_mode.apple.x = (game_settings.display_width // 2) - 2 * game_settings.step_size
+    game_mode.apple.y = (
+        game_settings.display_height // 2
+    ) + 2 * game_settings.step_size
 
     return game_mode
 
@@ -162,12 +165,12 @@ def test_human_game_mode_not_running(
 
 def test_human_game_mode_hard_boundary(
     monkeypatch: pytest.MonkeyPatch,
-    settings: game_settings.Settings,
+    game_settings: settings.GameSettings,
 ) -> None:
     """Test the human game mode with a hard boundary."""
     # GIVEN a game_mode with a hard boundary
-    settings.boundary_type = enums.BoundaryType.HARD_BOUNDARY
-    game_mode = game_modes.HumanGameMode(settings=settings)
+    game_settings.boundary_type = enums.BoundaryType.HARD_BOUNDARY
+    game_mode = game_modes.HumanGameMode(game_settings=game_settings)
     game_mode.snake.direction = enums.Direction.RIGHT
     # AND a sequence of direction events
     events = [

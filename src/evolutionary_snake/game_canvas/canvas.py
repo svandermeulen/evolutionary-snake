@@ -2,13 +2,14 @@
 
 import pygame
 
-from evolutionary_snake import game_objects, game_settings
+from evolutionary_snake import game_objects
+from evolutionary_snake.settings import game_settings
 
 
 class Canvas:
     """The game canvas."""
 
-    def __init__(self, settings: game_settings.Settings) -> None:
+    def __init__(self, settings: game_settings.GameSettings) -> None:
         """Initialize the game canvas."""
         if not pygame.get_init():
             pygame.init()

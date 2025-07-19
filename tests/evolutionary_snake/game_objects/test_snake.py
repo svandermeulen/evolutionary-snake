@@ -2,7 +2,7 @@
 
 import pytest
 
-from evolutionary_snake import game_objects, game_settings
+from evolutionary_snake import game_objects, settings
 from evolutionary_snake.game_objects import boundaries
 
 
@@ -58,11 +58,11 @@ def test_snake_periodic_boundary_conditions(
 
 
 def test_snake_hard_boundary(
-    settings: game_settings.Settings, snake: game_objects.Snake
+    game_settings: settings.GameSettings, snake: game_objects.Snake
 ) -> None:
     """Test the hard boundary conditions."""
     # GIVEN a snake object where the boundary is set to HARD_BOUNDARY
-    snake.boundary = boundaries.HardBoundary(settings)
+    snake.boundary = boundaries.HardBoundary(game_settings)
     direction_init = snake.direction
     # WHEN the update method is called
     snake.update(direction=direction_init)
