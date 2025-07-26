@@ -12,7 +12,7 @@ def test_canvas_init(game_settings: settings.GameSettings) -> None:
     assert not pygame.get_init()
     # WHEN a canvas object is instantiated
     canvas = game_canvas.Canvas(
-        settings=game_settings,
+        game_settings=game_settings,
     )
     # THEN pygame should have been initialized
     assert pygame.get_init()
@@ -27,7 +27,7 @@ def test_canvas_with_pygame_init(game_settings: settings.GameSettings) -> None:
     pygame.init()
     # WHEN a canvas object is instantiated
     canvas = game_canvas.Canvas(
-        settings=game_settings,
+        game_settings=game_settings,
     )
     # THEN pygame should have been initialized
     assert pygame.get_init()

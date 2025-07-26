@@ -1,12 +1,15 @@
 """Config of the evolutionary snake game."""
 
 import itertools
+import os
 import pathlib
 
 import neat
 import pydantic
 
 from evolutionary_snake.utils import enums
+
+os.environ["PYTHONWARNINGS"] = "ignore"
 
 
 class GameSettings(pydantic.BaseModel):
@@ -17,6 +20,8 @@ class GameSettings(pydantic.BaseModel):
     snake_length_init: int = 3
     display_width: int = 100 * game_size
     display_height: int = 100 * game_size
+    display_x: int = 30
+    display_y: int = 30
     boundary_type: enums.BoundaryType = enums.BoundaryType.HARD_BOUNDARY
     frame_rate_fps: float = 20
     run_in_background: bool = False
@@ -24,8 +29,8 @@ class GameSettings(pydantic.BaseModel):
     @property
     def coordinates_grid(self) -> list[tuple[int, int]]:
         """Returns the coordinates of the snake game grid."""
-        x_list = list(range(0, self.display_width + self.step_size, self.step_size))
-        y_list = list(range(0, self.display_height + self.step_size, self.step_size))
+        x_list = list(range(0, self.display_width, self.step_size))
+        y_list = list(range(0, self.display_height, self.step_size))
         return list(itertools.product(x_list, y_list))
 
 
@@ -39,6 +44,8 @@ class AiGameSettings(GameSettings):
     )
     neural_net: neat.nn.FeedForwardNetwork
     step_limit: int = 50
+    screens_per_row: int = 5
+    screens_per_col: int = 3
     approaching_score: int = 1
     retracting_penalty: float = 1.5
     eat_apple_score: int = 100

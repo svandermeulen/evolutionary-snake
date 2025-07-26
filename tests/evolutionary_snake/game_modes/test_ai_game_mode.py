@@ -133,7 +133,7 @@ def test_ai_game_mode_snake_explores_all_directions(
     exp_steps_total = 5
     assert game_mode.loss_tracker.steps_total == exp_steps_total
     # AND the loss should be equal to an expected value
-    exp_loss = 7
+    exp_loss = 12
     assert round(game_mode.loss_tracker.loss) == exp_loss
     # AND the score should be equal to 0
     assert game_mode.score == 0

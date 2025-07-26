@@ -75,5 +75,4 @@ def apple_fixture(
         boundary=boundary,
         snake_coordinates=snake.coordinates,
         settings=game_settings,
-        seed=1234,
     )

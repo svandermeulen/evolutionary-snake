@@ -1,23 +1,30 @@
 """The game canvas."""
 
+import os
+
 import pygame
 
-from evolutionary_snake import game_objects
-from evolutionary_snake.settings import game_settings
+from evolutionary_snake import game_objects, settings
 
 
 class Canvas:
     """The game canvas."""
 
-    def __init__(self, settings: game_settings.GameSettings) -> None:
+    def __init__(self, game_settings: settings.GameSettings) -> None:
         """Initialize the game canvas."""
+        os.environ["SDL_VIDEO_WINDOW_POS"] = (
+            f"{game_settings.display_x},{game_settings.display_y}"
+        )
         if not pygame.get_init():
             pygame.init()
-        self.settings = settings
         self.canvas = pygame.display.set_mode(
-            (settings.display_width, settings.display_height + settings.step_size),
+            (
+                game_settings.display_width,
+                game_settings.display_height + game_settings.step_size,
+            ),
             pygame.HWSURFACE,
         )
+        self.settings = game_settings
         self.canvas.fill((255, 255, 255))
 
     def draw_snake(self, snake: game_objects.Snake) -> None:

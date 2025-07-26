@@ -32,7 +32,7 @@ class BaseGameMode(abc.ABC):
         )
         self.apple = self.generate_apple()
         self.canvas = (
-            canvas.Canvas(settings=game_settings)
+            canvas.Canvas(game_settings=game_settings)
             if not game_settings.run_in_background
             else None
         )

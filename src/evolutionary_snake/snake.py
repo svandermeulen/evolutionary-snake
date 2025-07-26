@@ -67,3 +67,7 @@ def run_snake(
         kwargs["neural_net"] = _get_neural_net_from_checkpoint(path_checkpoint)
     game = game_mode_factory(**kwargs)
     return game.run()
+
+
+if __name__ == "__main__":  # pragma: no cover
+    run_snake(game_mode=enums.GameMode.HUMAN_PLAYER)

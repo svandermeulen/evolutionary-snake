@@ -17,7 +17,8 @@ TIME = DATETIME_NOW.strftime("%H%M%S")
 class TrainingSettings(pydantic.BaseModel):
     """Settings for the training mode."""
 
-    generations: int = 5
+    generations: int = 25
+    step_limit: int = 50
     checkpoint_prefix: pathlib.Path = pydantic.Field(
         default=pathlib.Path(__file__).parents[3]
         / "data"

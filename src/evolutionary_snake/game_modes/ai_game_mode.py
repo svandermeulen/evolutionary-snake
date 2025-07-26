@@ -45,7 +45,9 @@ class AiGameMode(base_game_mode.BaseGameMode):
                 f"{exploration_minimum} times."
             )
             logger.info(msg)
-            self.loss_tracker.loss *= math.sqrt(exploration_minimum + 1)
+            self.loss_tracker.loss += abs(self.loss_tracker.loss) * math.sqrt(
+                exploration_minimum + 1
+            )
 
         msg = (
             f"{self.name} finished with:\n\t"

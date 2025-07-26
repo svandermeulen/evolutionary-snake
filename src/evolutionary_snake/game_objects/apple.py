@@ -15,13 +15,11 @@ class Apple:  # pylint: disable=too-few-public-methods
         snake_coordinates: list[tuple[int, int]],
         settings: game_settings.GameSettings,
         boundary: base_boundary.BaseBoundary,
-        seed: int | None = None,
     ) -> None:
         """Initialize the apple game object."""
         self.snake_coordinates = snake_coordinates
         self.coordinates_grid = settings.coordinates_grid
         self.boundary = boundary
-        self.seed = seed
         self.x, self.y = self._generate_coordinates()
 
     def _generate_coordinates(self) -> tuple[int, int]:
@@ -39,7 +37,5 @@ class Apple:  # pylint: disable=too-few-public-methods
         if isinstance(self.boundary, boundaries.HardBoundary):
             coordinates = [c for c in coordinates if c not in self.boundary.coordinates]
 
-        if self.seed:
-            random.seed(self.seed)
-
-        return random.choice(coordinates)  # noqa: S311 #  nosec
+        random.shuffle(coordinates)
+        return coordinates[0]
